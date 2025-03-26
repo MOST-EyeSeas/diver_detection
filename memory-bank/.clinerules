@@ -1,0 +1,83 @@
+# Cline's Project Intelligence for Diver Detection System
+
+## Project Patterns
+
+### Docker Environment Preferences
+- Always use `--gpus all` and `--ipc=host` flags for Docker runs to ensure proper GPU access
+- X11 forwarding requires proper configuration for visualization to work:
+  - Set `DISPLAY` environment variable
+  - Mount `/tmp/.X11-unix` directory
+  - Mount `.Xauthority` file
+  - Set `QT_X11_NO_MITSHM=1` to avoid shared memory issues
+
+### YOLO-specific Patterns
+- Use `yolo predict model=yolo11n.pt show=True` to test basic inference with visualization
+- For non-GUI operation, use `show=False` to disable visualization
+- Model files use `.pt` extension and are typically kept in the project root
+- Models are gitignored (not stored in version control)
+
+### Workflow Patterns
+- Development happens on Ubuntu x86 with GPU
+- Final deployment target is NVIDIA Jetson
+- Use VS Code with devcontainers for consistent development environment
+- SSH/Git operations require correct permissions (600) on key files
+
+### File Organization
+- Docker configuration in `Dockerfile` and `.devcontainer/`
+- Model files in project root (`.pt` extension)
+- Memory bank documentation in `memory-bank/`
+- Use relative paths in code to maintain portability
+
+## Critical Implementation Paths
+
+### GPU Access
+- NVIDIA GPU must be properly accessible from the container
+- Use `nvidia-smi` to verify GPU visibility
+- CUDA initialization errors often relate to missing GPU access or driver mismatch
+
+### X11 Display
+- Use `DISPLAY` environment variable to forward X11 display
+- GTK dependencies are required for proper OpenCV GUI support
+- Test with `yolo predict model=yolo11n.pt show=True` to verify visualization works
+
+### SSH Configuration
+- SSH files require specific permissions (directory: 700, key files: 600)
+- When mounting from host, use separate directory with correct permissions
+- Configure Git to use specific SSH command with proper key path
+
+## Known Challenges
+
+### OpenCV GTK Support
+- Symptoms: "Environment does not support cv2.imshow()" or "Rebuild with GTK+"
+- Solution: Install GTK development libraries in container
+- Required packages: libgtk2.0-dev, libgtk-3-dev, and related dependencies
+
+### CUDA Initialization
+- Symptoms: "CUDA unknown error" or initialization failure
+- Solutions:
+  - Use `--gpus all` flag for Docker
+  - Set `NVIDIA_VISIBLE_DEVICES=all` environment variable
+  - Ensure host drivers are compatible
+
+### SSH Permission Issues
+- Symptoms: "Bad owner or permissions" errors
+- Solution: Create dedicated .ssh directory with proper permissions instead of mounting
+
+## Project-Specific Intelligence
+
+### Model Selection
+- YOLOv8n is a good starting point for testing (~6.3 MB size)
+- For Jetson deployment, models should be optimized for edge inference
+- Consider nano or small variants for resource-constrained environments
+
+### Performance Expectations
+- Development GPU (RTX 3070): ~60+ FPS inference expected
+- Jetson target: 10-30 FPS depending on model size and optimization
+
+### Underwater Conditions
+- Underwater imagery presents special challenges:
+  - Color distortion (blue/green dominant)
+  - Light scattering effects
+  - Particulates and bubbles
+  - Variable visibility ranges
+- Dataset augmentation should account for these conditions 
