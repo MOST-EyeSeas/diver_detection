@@ -25,15 +25,16 @@
 		"QT_X11_NO_MITSHM": "1"
 	},
 	
-	// Volume mounts for X11 forwarding
+	// Volume mounts for X11 forwarding and SSH authentication
 	"mounts": [
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
 		"source=${localEnv:HOME}/.Xauthority,target=/root/.Xauthority,type=bind,consistency=cached",
-		"source=/dev/shm,target=/dev/shm,type=bind"
+		"source=/dev/shm,target=/dev/shm,type=bind",
+		"source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly"
 	],
 
 	// Post-create commands to verify setup
-	"postCreateCommand": "xhost +local:docker || true && echo 'X11 forwarding setup' && nvidia-smi && python -c 'import cv2; print(\"OpenCV version:\", cv2.__version__); print(\"GTK support:\", \"GTK\" in cv2.getBuildInformation())'",
+	"postCreateCommand": "xhost +local:docker || true && echo 'X11 forwarding setup' && nvidia-smi && python -c 'import cv2; print(\"OpenCV version:\", cv2.__version__); print(\"GTK support:\", \"GTK\" in cv2.getBuildInformation())' && chmod 600 /root/.ssh/id_rsa || true",
 
 	// Set container capabilities for X11 and NVIDIA
 	"capAdd": ["SYS_ADMIN"],
@@ -42,7 +43,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-python.python"
+				"ms-python.python",
+				"GitHub.vscode-pull-request-github"
 			],
 			"settings": {
 				"python.defaultInterpreterPath": "/opt/conda/bin/python"

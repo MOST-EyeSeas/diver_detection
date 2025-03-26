@@ -31,6 +31,12 @@ ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES all
 ENV QT_X11_NO_MITSHM=1
 
+# Install Git and SSH for repository operations
+RUN apt-get update && apt-get install -y \
+    openssh-client \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
 # Reinstall OpenCV with GUI support
 RUN pip uninstall -y opencv-python opencv-python-headless && \
     pip install --no-cache-dir opencv-python
