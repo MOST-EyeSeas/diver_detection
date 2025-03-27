@@ -12,6 +12,7 @@ We are currently in the **dataset preparation phase** of the diver detection pro
 6. Successfully tested basic YOLO functionality
 7. Created download script for VDD-C dataset
 8. Identified VDD-C as an excellent dataset for diver detection
+9. Created dataset preparation script (prepare_vddc.py) to extract and organize dataset
 
 ## Current Tasks
 - [x] Set up Docker development environment
@@ -22,7 +23,7 @@ We are currently in the **dataset preparation phase** of the diver detection pro
 - [x] Identify source for diver image dataset
 - [x] Create download script for diver dataset
 - [ ] Download and extract VDD-C dataset
-- [ ] Create YOLO-compatible dataset structure
+- [x] Create script for YOLO-compatible dataset structure
 - [ ] Develop initial model training workflow
 
 ## Next Steps
@@ -30,9 +31,8 @@ We are currently in the **dataset preparation phase** of the diver detection pro
 ### Immediate Next Steps (Current Sprint)
 1. **Dataset Acquisition and Preparation**
    - Download VDD-C dataset (images.zip and yolo_labels.zip)
-   - Extract and organize dataset into YOLO-compatible format
-   - Create dataset.yaml configuration file
-   - Verify dataset integrity
+   - Run prepare_vddc.py to extract and organize dataset into YOLO-compatible format
+   - Verify dataset integrity after extraction
 
 2. **Initial Model Testing**
    - Test YOLO model on sample diver images from dataset
@@ -41,7 +41,7 @@ We are currently in the **dataset preparation phase** of the diver detection pro
 
 3. **Dataset Processing Pipeline**
    - Set up data preprocessing pipeline
-   - Create train/val/test splits if needed
+   - Utilize train/val split created by prepare_vddc.py
    - Implement data visualization tools
 
 ### Upcoming Priorities
@@ -71,16 +71,17 @@ We are currently in the **dataset preparation phase** of the diver detection pro
    - Need to evaluate which version works best with VDD-C dataset
 
 3. **Dataset Processing Approach**
-   - Determine appropriate train/val/test split ratio
-   - Consider creating smaller subset for initial rapid testing
-   - Plan for efficient local storage of large dataset (7.63GB images + labels)
+   - ✅ Implemented 80/20 train/val split ratio in prepare_vddc.py
+   - Created script for automatic processing of dataset
+   - Designed for efficient extraction and organization
+   - Added verification steps to ensure dataset integrity
 
 ### Known Challenges
 1. **Dataset Size Considerations**
    - VDD-C dataset is large (7.63GB for images.zip)
    - Need to ensure sufficient storage space
    - Download may take significant time
-   - Consider incremental download and extraction process
+   - ✅ Created prepare_vddc.py with efficient extraction process
 
 2. **Underwater Image Characteristics**
    - Color distortion and limited visibility

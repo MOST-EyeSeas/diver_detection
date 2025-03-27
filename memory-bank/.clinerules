@@ -28,9 +28,16 @@
   - `python download_vddc.py --readme` - Download just README
   - `python download_vddc.py --images --yolo-labels` - Download images and YOLO labels
   - `python download_vddc.py --all` - Download all dataset components
+- Use prepare_vddc.py script to prepare dataset:
+  - `python prepare_vddc.py` - Extract and organize with default settings
+  - `python prepare_vddc.py --verify-only` - Just verify downloaded files
+  - `python prepare_vddc.py --force` - Overwrite existing extracted files
+  - `python prepare_vddc.py --train-val-split 0.8` - Custom train/val split ratio
 - Dataset organization follows YOLO convention:
-  - images/ - Contains image files
-  - labels/ - Contains corresponding label files
+  - images/train/ - Contains training image files
+  - images/val/ - Contains validation image files
+  - labels/train/ - Contains corresponding training label files
+  - labels/val/ - Contains corresponding validation label files
   - dataset.yaml - Configuration file for training
 
 ### Workflow Patterns
@@ -46,6 +53,11 @@
 - Dataset files in `sample_data/vdd-c/`
   - `raw/` - Raw downloaded files
   - `dataset/` - Processed YOLO-compatible dataset
+  - `dataset/images/train/` - Training images
+  - `dataset/images/val/` - Validation images
+  - `dataset/labels/train/` - Training labels
+  - `dataset/labels/val/` - Validation labels
+  - `dataset/dataset.yaml` - YOLO dataset configuration
 - Use relative paths in code to maintain portability
 
 ## Critical Implementation Paths
@@ -75,6 +87,14 @@
 - Downloads stored in sample_data/vdd-c/raw/ by default
 - Format of VDD-C annotations is compatible with YOLO training
 
+### Dataset Preparation
+- prepare_vddc.py handles extraction and organization with proper structure
+- Creates train/val split (default 80% training, 20% validation)
+- Generates dataset.yaml file with appropriate paths and class definitions
+- Uses temporary directories during extraction to avoid partial processing
+- Verifies YOLO compatibility of prepared dataset
+- Cleans up temporary files after processing
+
 ## Known Challenges
 
 ### OpenCV GTK Support
@@ -102,8 +122,9 @@
 - Solution: 
   - Use download_vddc.py with resume capability
   - Download only necessary components (--images --yolo-labels)
-  - Consider incremental processing
-- Status: Addressed with custom download script
+  - Use prepare_vddc.py for efficient extraction and organization
+  - Consider processing subsets for faster initial testing
+- Status: Addressed with custom download and preparation scripts
 
 ## Project-Specific Intelligence
 
@@ -133,6 +154,23 @@
   - Progress tracking with tqdm
   - Download verification
   - Automatic retry on failure
+
+### Preparation Script Usage
+- Command: `python prepare_vddc.py [options]`
+- Important options:
+  - `--input-dir DIR` - Directory with downloaded files (default: sample_data/vdd-c/raw)
+  - `--output-dir DIR` - Directory for prepared dataset (default: sample_data/vdd-c/dataset)
+  - `--verify-only` - Only verify downloads without extraction
+  - `--force` - Overwrite existing extracted files
+  - `--train-val-split RATIO` - Custom train/validation split (default: 0.8)
+  - `--skip-verification` - Skip final YOLO compatibility verification
+- Features:
+  - Download verification before extraction
+  - Progress tracking during extraction
+  - Random train/val splitting
+  - dataset.yaml generation
+  - YOLO compatibility verification
+  - Temporary directory cleanup
 
 ### Model Selection
 - YOLOv8n is a good starting point for testing (~6.3 MB size, 6.5 GFLOPs)

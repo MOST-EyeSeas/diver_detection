@@ -11,8 +11,9 @@
 | CUDA Configuration | ✅ Resolved | GPU acceleration working properly |
 | Dataset Source | ✅ Identified | VDD-C dataset with 100,000+ annotated diver images |
 | Download Script | ✅ Created | Python script with resume capability for VDD-C download |
+| Dataset Preparation Script | ✅ Created | Python script to extract and organize dataset for YOLO |
 | Dataset Download | 🔄 In Progress | Ready to download images.zip and yolo_labels.zip |
-| Dataset Preparation | 🔄 Not Started | Will organize into YOLO-compatible format |
+| Dataset Preparation | 🔄 Not Started | Will organize into YOLO-compatible format using prepare_vddc.py |
 | Model Training | 🔄 Not Started | Awaiting dataset preparation |
 | Jetson Deployment | 🔄 Not Started | Future work |
 
@@ -40,6 +41,17 @@
   - MD5 verification support
   - Command-line interface with flexible options
 
+### Dataset Preparation
+- Created prepare_vddc.py script with the following capabilities:
+  - Verifies downloaded files before extraction
+  - Creates proper YOLO dataset directory structure
+  - Extracts ZIP files with progress tracking
+  - Splits dataset into train/val sets (80/20 by default)
+  - Creates dataset.yaml configuration file for YOLO
+  - Verifies YOLO compatibility of the prepared dataset
+  - Includes cleanup of temporary extraction directories
+  - Provides command-line options for customization
+
 ### Testing Capabilities
 - Basic YOLO inference using pre-trained models is functional
 - Successfully ran `yolo predict model=yolo11n.pt show=True` to test detection
@@ -52,10 +64,8 @@
 ### High Priority (Current Sprint)
 1. **Dataset Download and Preparation**
    - Download VDD-C dataset components (images.zip, yolo_labels.zip)
-   - Extract ZIP archives
-   - Organize into YOLO-compatible directory structure
-   - Create dataset.yaml configuration file
-   - Create preparation script for automating dataset setup
+   - Run prepare_vddc.py to extract and organize dataset
+   - Verify dataset organization and YOLO compatibility
 
 2. **Initial Model Training**
    - Configure YOLO for diver detection using VDD-C dataset
@@ -112,6 +122,7 @@
   - Includes challenging underwater conditions (visibility, lighting, etc.)
   - Suitable for YOLO training with provided YOLO format labels
 - The download_vddc.py script handles large file downloads well with resume capability
+- The prepare_vddc.py script creates a proper YOLO dataset structure with train/val splits
 
 ## Upcoming Milestones
 
@@ -121,6 +132,7 @@
 | YOLO Testing | Complete | ✅ Done |
 | Dataset Source Identification | Complete | ✅ Done |
 | Dataset Download Scripts | Complete | ✅ Done |
+| Dataset Preparation Scripts | Complete | ✅ Done |
 | Dataset Download & Preparation | Week 2 | 🔄 In Progress |
 | Initial Model Training | Week 3 | 🔄 Not Started |
 | Performance Evaluation | Week 4 | 🔄 Not Started |
