@@ -166,12 +166,16 @@ def split_dataset(temp_images_dir, temp_labels_dir, output_dir, train_val_split=
     print(f"Assigning {len(val_images)} images to validation set")
     
     # Process training images and labels
-    process_dataset_split(train_images, temp_images_dir, temp_labels_dir, 
+    train_success = process_dataset_split(train_images, temp_images_dir, temp_labels_dir, 
                          output_dir, "train")
     
     # Process validation images and labels
-    process_dataset_split(val_images, temp_images_dir, temp_labels_dir, 
+    val_success = process_dataset_split(val_images, temp_images_dir, temp_labels_dir, 
                          output_dir, "val")
+    
+    if not train_success or not val_success:
+        print("⚠️ Warning: At least one split had no matching labels found.")
+        print("Please check that the label files match the image files.")
     
     return True
 
@@ -183,19 +187,44 @@ def process_dataset_split(image_files, temp_images_dir, temp_labels_dir, output_
     
     print(f"Processing {split_name} split...")
     
+    labels_found = 0
+    total_images = len(image_files)
+    
     for img_path in tqdm(image_files, desc=f"Copying {split_name} files"):
         # Get relative path from the temp images directory
         rel_path = img_path.relative_to(temp_images_dir)
         
-        # Construct label path
-        label_path = temp_labels_dir / rel_path.with_suffix('.txt')
+        # Extract image filename and directory components
+        image_filename = img_path.name
+        image_stem = img_path.stem
+        rel_dir = str(rel_path.parent).replace('images/', '')
+        
+        # Build the correct label path using the image filename pattern
+        # The labels are organized in yolo/train, yolo/val, yolo/test directories
+        possible_label_paths = [
+            temp_labels_dir / "yolo" / "train" / f"{rel_dir}_{image_stem}.txt",
+            temp_labels_dir / "yolo" / "val" / f"{rel_dir}_{image_stem}.txt",
+            temp_labels_dir / "yolo" / "test" / f"{rel_dir}_{image_stem}.txt",
+            # Also check directories without directory prefix in case of direct matches
+            temp_labels_dir / "yolo" / "train" / f"{image_stem}.txt",
+            temp_labels_dir / "yolo" / "val" / f"{image_stem}.txt",
+            temp_labels_dir / "yolo" / "test" / f"{image_stem}.txt"
+        ]
         
         # Copy image
-        shutil.copy2(img_path, images_dir / img_path.name)
+        shutil.copy2(img_path, images_dir / image_filename)
         
-        # Copy label if it exists
-        if label_path.exists():
-            shutil.copy2(label_path, labels_dir / label_path.name)
+        # Check all possible label paths and copy the first one found
+        label_found = False
+        for label_path in possible_label_paths:
+            if label_path.exists():
+                shutil.copy2(label_path, labels_dir / f"{image_stem}.txt")
+                labels_found += 1
+                label_found = True
+                break
+    
+    print(f"Processed {total_images} images with {labels_found} matching labels for {split_name} set")
+    return labels_found > 0
 
 def create_yaml_config(output_dir, train_val_split=0.8):
     """Create a YOLO-compatible dataset.yaml file."""
@@ -274,20 +303,54 @@ def verify_yolo_compatibility(dataset_yaml_path):
             print("❌ Error: No validation images found")
             return False
         
-        # Check a few random images for corresponding labels
+        # Check all training and validation images for corresponding labels
+        train_labels_path = base_path / "labels" / "train"
+        val_labels_path = base_path / "labels" / "val"
+        
+        train_labels = list(train_labels_path.glob("*.txt"))
+        val_labels = list(val_labels_path.glob("*.txt"))
+        
+        print(f"Found {len(train_images)} training images and {len(train_labels)} training labels")
+        print(f"Found {len(val_images)} validation images and {len(val_labels)} validation labels")
+        
+        # Check some random training images for corresponding labels
         labels_found = 0
-        for img_path in random.sample(train_images, min(5, len(train_images))):
+        sample_size = min(20, len(train_images))
+        for img_path in random.sample(train_images, sample_size):
             img_name = img_path.stem
-            label_path = base_path / "labels" / "train" / f"{img_name}.txt"
+            label_path = train_labels_path / f"{img_name}.txt"
             if label_path.exists():
                 labels_found += 1
         
         if labels_found == 0:
-            print("⚠️ Warning: No labels found for sample images")
+            print("⚠️ Warning: No labels found for sample training images")
         else:
-            print(f"✅ Found labels for {labels_found} sample images")
+            print(f"✅ Found labels for {labels_found}/{sample_size} sample training images ({labels_found/sample_size:.1%})")
         
-        print("✅ Dataset appears to be YOLO-compatible")
+        # Check some random validation images for corresponding labels
+        val_labels_found = 0
+        val_sample_size = min(20, len(val_images))
+        for img_path in random.sample(val_images, val_sample_size):
+            img_name = img_path.stem
+            label_path = val_labels_path / f"{img_name}.txt"
+            if label_path.exists():
+                val_labels_found += 1
+        
+        if val_labels_found == 0:
+            print("⚠️ Warning: No labels found for sample validation images")
+        else:
+            print(f"✅ Found labels for {val_labels_found}/{val_sample_size} sample validation images ({val_labels_found/val_sample_size:.1%})")
+        
+        # Overall assessment
+        if labels_found == 0 and val_labels_found == 0:
+            print("❌ Error: No labels found for any sample images, dataset is not properly prepared")
+            return False
+        elif (labels_found / sample_size) < 0.5 or (val_labels_found / val_sample_size) < 0.5:
+            print("⚠️ Warning: Less than 50% of sample images have matching labels")
+            print("Dataset may have partial annotation coverage")
+        else:
+            print("✅ Dataset appears to be properly annotated and YOLO-compatible")
+        
         return True
         
     except Exception as e:
@@ -333,6 +396,15 @@ def main():
     # Extract dataset
     try:
         temp_images_dir, temp_labels_dir = extract_dataset(args.input_dir, args.output_dir, args.force)
+        
+        # Verify label directory structure
+        yolo_dir = temp_labels_dir / "yolo"
+        if not yolo_dir.exists():
+            print("⚠️ Warning: Expected 'yolo' directory not found in labels extraction.")
+            print(f"Found instead: {list(temp_labels_dir.glob('*'))}")
+        else:
+            print(f"✅ Found YOLO labels directory with subdirectories: {list(yolo_dir.glob('*'))}")
+            print(f"Label files count: {len(list(yolo_dir.glob('**/*.txt')))}")
     except Exception as e:
         print(f"❌ Error during extraction: {e}")
         return 1

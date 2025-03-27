@@ -18,16 +18,17 @@
 - Default source for inference is `/ultralytics/ultralytics/assets` with sample images
 - Specify custom source with `source=path/to/image_or_folder`
 - Default models detect 80 classes including person, can be used for initial diver testing
+- For training, use `yolo train model=yolov8n.pt data=path/to/dataset.yaml epochs=100 imgsz=640`
 
 ### Dataset Patterns
 - VDD-C dataset is used for diver detection training
 - Components needed for YOLO training:
-  - images.zip (7.63 GB) - Main image files
-  - yolo_labels.zip (27.82 MB) - Labels in YOLO format
+  - images.zip (8.38 GB) - Main image files
+  - yolo_labels.zip (6.06 MB) - Labels in YOLO format
 - Use download_vddc.py script to download dataset:
   - `python download_vddc.py --readme` - Download just README
   - `python download_vddc.py --images --yolo-labels` - Download images and YOLO labels
-  - `python download_vddc.py --all` - Download all dataset components
+  - `python download_vddc.py --all` - Download all components
 - Use prepare_vddc.py script to prepare dataset:
   - `python prepare_vddc.py` - Extract and organize with default settings
   - `python prepare_vddc.py --verify-only` - Just verify downloaded files
@@ -39,6 +40,10 @@
   - labels/train/ - Contains corresponding training label files
   - labels/val/ - Contains corresponding validation label files
   - dataset.yaml - Configuration file for training
+- Label formats:
+  - YOLO format: class_id x_center y_center width height (normalized 0-1)
+  - Single class (0 = diver) in our dataset
+  - Example: `0 0.266927 0.067130 0.186979 0.134259`
 
 ### Workflow Patterns
 - Development happens on Ubuntu x86 with GPU
@@ -81,7 +86,7 @@
 - Configure Git to use specific SSH command with proper key path
 
 ### Dataset Download and Management
-- VDD-C dataset is large (7.63GB for images.zip)
+- VDD-C dataset is large (8.38GB for images.zip)
 - download_vddc.py script has resume capability for interrupted downloads
 - Uses tqdm for progress tracking
 - Downloads stored in sample_data/vdd-c/raw/ by default
@@ -94,6 +99,21 @@
 - Uses temporary directories during extraction to avoid partial processing
 - Verifies YOLO compatibility of prepared dataset
 - Cleans up temporary files after processing
+- Processed dataset statistics:
+  - Original: 105,552 total images (84,441 training, 21,111 validation)
+  - Matched labels: 83,858 training, 20,972 validation
+  - Final processed: 5,997 training, 5,763 validation images
+
+### YOLO Training
+- Use the dataset.yaml file from prepared dataset
+- Configure appropriate batch size based on available GPU memory
+- Set training epochs (typically 50-100 for initial training)
+- Use pretrained weights for faster convergence (yolov8n.pt)
+- Monitor training with built-in tensorboard logging
+- Expected metrics to track:
+  - mAP (mean Average Precision)
+  - Precision and recall
+  - Loss values (box loss, class loss, etc.)
 
 ## Known Challenges
 
@@ -124,7 +144,15 @@
   - Download only necessary components (--images --yolo-labels)
   - Use prepare_vddc.py for efficient extraction and organization
   - Consider processing subsets for faster initial testing
-- Status: Addressed with custom download and preparation scripts
+- Status: Resolved with custom download and preparation scripts
+
+### Label File Matching
+- Symptoms: Labels not being found for images
+- Solution:
+  - VDD-C label files use a specific naming convention: [directory]_[image_name].txt
+  - Modified prepare_vddc.py to check multiple possible label locations
+  - Added support for checking in yolo/train, yolo/val, and yolo/test directories
+- Status: Resolved with improved label matching logic
 
 ## Project-Specific Intelligence
 
@@ -134,18 +162,21 @@
 - Already annotated for diver detection
 - Includes challenging underwater conditions (visibility, particles, lighting)
 - Available formats:
-  - YOLO labels (yolo_labels.zip) - Use this for our project
+  - YOLO labels (yolo_labels.zip) - Used for this project
   - VOC labels (voc_labels.zip)
   - TFRecord labels (tfrecord_labels.zip)
   - TFSequence labels (multiple zip parts)
 - Published by researchers at University of Minnesota
 - Licensed under Creative Commons Attribution-ShareAlike 3.0
+- Label file organization:
+  - Stored in yolo/train, yolo/val, yolo/test directories
+  - Named as [directory]_[image_name].txt (e.g., barbados_scuba_001_A_0101.txt)
 
 ### Download Script Usage
 - Command: `python download_vddc.py [options]`
 - Important options:
-  - `--images` - Download images.zip (7.63 GB)
-  - `--yolo-labels` - Download YOLO format labels (27.82 MB)
+  - `--images` - Download images.zip (8.38 GB)
+  - `--yolo-labels` - Download YOLO format labels (6.06 MB)
   - `--readme` - Download README file (7.16 KB)
   - `--all` - Download all components
   - `--output-dir DIR` - Custom download location
@@ -171,6 +202,26 @@
   - dataset.yaml generation
   - YOLO compatibility verification
   - Temporary directory cleanup
+- Output:
+  - Creates YOLO-compatible dataset structure
+  - Generates dataset.yaml file
+  - Final dataset statistics:
+    - 5,997 training images with labels
+    - 5,763 validation images with labels
+
+### YOLO Training Command
+- Basic training command:
+  ```
+  yolo train model=yolov8n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=100 imgsz=640
+  ```
+- Important parameters:
+  - `model`: Starting model (pretrained)
+  - `data`: Path to dataset.yaml
+  - `epochs`: Number of training epochs
+  - `imgsz`: Input image size
+  - `batch`: Batch size
+  - `patience`: Early stopping patience
+  - `device`: GPU device selection
 
 ### Model Selection
 - YOLOv8n is a good starting point for testing (~6.3 MB size, 6.5 GFLOPs)
@@ -194,4 +245,4 @@
 ### Testing Results
 - Default YOLOv8n model successfully detects persons in sample images
 - Detection time: ~48ms inference (not including pre/post-processing)
-- Next steps: test on actual underwater diver images from VDD-C dataset 
+- Next steps: train custom model on prepared VDD-C dataset 
