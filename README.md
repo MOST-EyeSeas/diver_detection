@@ -51,6 +51,12 @@ yolo predict model=yolo11n.pt show=True
 yolo predict model=yolo11n.pt source=path/to/image_or_folder show=True
 ```
 
+
+```bash
+# Train
+yolo train model=yolov8n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=100 imgsz=640
+```
+
 ## References
 
 - [YOLO Documentation](https://docs.ultralytics.com/)
