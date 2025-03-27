@@ -9,7 +9,10 @@
 | Base YOLO Framework | ✅ Verified | Successfully tested with default models |
 | SSH/Git Configuration | ✅ Fixed | Now working with correct permissions |
 | CUDA Configuration | ✅ Resolved | GPU acceleration working properly |
-| Dataset Collection | 🔄 Not Started | Planned for next sprint |
+| Dataset Source | ✅ Identified | VDD-C dataset with 100,000+ annotated diver images |
+| Download Script | ✅ Created | Python script with resume capability for VDD-C download |
+| Dataset Download | 🔄 In Progress | Ready to download images.zip and yolo_labels.zip |
+| Dataset Preparation | 🔄 Not Started | Will organize into YOLO-compatible format |
 | Model Training | 🔄 Not Started | Awaiting dataset preparation |
 | Jetson Deployment | 🔄 Not Started | Future work |
 
@@ -23,6 +26,20 @@
 - Git/SSH integration is configured correctly
 - CUDA initialization issues resolved, GPU acceleration working
 
+### Data Acquisition
+- Identified VDD-C dataset as ideal source for diver detection training
+  - 100,000+ annotated images of divers underwater
+  - Includes images from both pool and Caribbean environments
+  - Already provides YOLO format labels (yolo_labels.zip)
+  - Available under Creative Commons license
+- Created download_vddc.py script with advanced features:
+  - Selective component download (images, labels, etc.)
+  - Progress tracking with tqdm
+  - Download resume capability for large files
+  - Automatic retry for failed downloads
+  - MD5 verification support
+  - Command-line interface with flexible options
+
 ### Testing Capabilities
 - Basic YOLO inference using pre-trained models is functional
 - Successfully ran `yolo predict model=yolo11n.pt show=True` to test detection
@@ -33,15 +50,18 @@
 ## What's Left to Build
 
 ### High Priority (Current Sprint)
-1. **Dataset Collection and Preparation**
-   - Gather underwater diver images
-   - Create annotation system/workflow
-   - Implement data preprocessing pipeline
+1. **Dataset Download and Preparation**
+   - Download VDD-C dataset components (images.zip, yolo_labels.zip)
+   - Extract ZIP archives
+   - Organize into YOLO-compatible directory structure
+   - Create dataset.yaml configuration file
+   - Create preparation script for automating dataset setup
 
 2. **Initial Model Training**
-   - Configure YOLO for diver detection
-   - Run initial training with small dataset
+   - Configure YOLO for diver detection using VDD-C dataset
+   - Run initial training with dataset
    - Evaluate baseline performance
+   - Test fine-tuned model on sample images
 
 3. **Testing Framework**
    - Create evaluation metrics for model assessment
@@ -78,7 +98,7 @@
 | CUDA Initialization | Medium | ✅ Resolved | Fixed GPU passthrough configuration |
 | SSH Permission Issues | Low | ✅ Resolved | Implemented custom SSH directory with correct permissions |
 | X11 Authorization | Low | ✅ Resolved | Added proper mount points and environment variables |
-| Sample Data | Low | 🔄 In Progress | Need underwater diver images for testing |
+| Dataset Size | Medium | 🔄 In Progress | VDD-C dataset is large (7.63GB for images), need to manage download and storage |
 
 ## Notes and Observations
 
@@ -86,8 +106,12 @@
 - GPU acceleration is working correctly with proper container configuration
 - Initial YOLO testing shows successful object detection on sample images
 - YOLOv8n model (~6.5 GFLOPs) provides good balance of performance and accuracy
-- Need to collect underwater imagery data, which may be challenging to source
-- May need to consider data augmentation techniques specific to underwater environments
+- VDD-C dataset provides excellent training data for underwater diver detection:
+  - Much larger than typical custom datasets (100,000+ images vs. few hundred)
+  - Already annotated, saving significant time
+  - Includes challenging underwater conditions (visibility, lighting, etc.)
+  - Suitable for YOLO training with provided YOLO format labels
+- The download_vddc.py script handles large file downloads well with resume capability
 
 ## Upcoming Milestones
 
@@ -95,7 +119,9 @@
 |-----------|-------------------|--------|
 | Environment Setup | Complete | ✅ Done |
 | YOLO Testing | Complete | ✅ Done |
-| Dataset Collection | Week 2 | 🔄 Not Started |
+| Dataset Source Identification | Complete | ✅ Done |
+| Dataset Download Scripts | Complete | ✅ Done |
+| Dataset Download & Preparation | Week 2 | 🔄 In Progress |
 | Initial Model Training | Week 3 | 🔄 Not Started |
 | Performance Evaluation | Week 4 | 🔄 Not Started |
 | Optimization for Jetson | Week 6 | 🔄 Not Started | 

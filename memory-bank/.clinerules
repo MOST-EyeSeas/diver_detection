@@ -19,6 +19,20 @@
 - Specify custom source with `source=path/to/image_or_folder`
 - Default models detect 80 classes including person, can be used for initial diver testing
 
+### Dataset Patterns
+- VDD-C dataset is used for diver detection training
+- Components needed for YOLO training:
+  - images.zip (7.63 GB) - Main image files
+  - yolo_labels.zip (27.82 MB) - Labels in YOLO format
+- Use download_vddc.py script to download dataset:
+  - `python download_vddc.py --readme` - Download just README
+  - `python download_vddc.py --images --yolo-labels` - Download images and YOLO labels
+  - `python download_vddc.py --all` - Download all dataset components
+- Dataset organization follows YOLO convention:
+  - images/ - Contains image files
+  - labels/ - Contains corresponding label files
+  - dataset.yaml - Configuration file for training
+
 ### Workflow Patterns
 - Development happens on Ubuntu x86 with GPU
 - Final deployment target is NVIDIA Jetson
@@ -29,6 +43,9 @@
 - Docker configuration in `Dockerfile` and `.devcontainer/`
 - Model files in project root (`.pt` extension)
 - Memory bank documentation in `memory-bank/`
+- Dataset files in `sample_data/vdd-c/`
+  - `raw/` - Raw downloaded files
+  - `dataset/` - Processed YOLO-compatible dataset
 - Use relative paths in code to maintain portability
 
 ## Critical Implementation Paths
@@ -50,6 +67,13 @@
 - SSH files require specific permissions (directory: 700, key files: 600)
 - When mounting from host, use separate directory with correct permissions
 - Configure Git to use specific SSH command with proper key path
+
+### Dataset Download and Management
+- VDD-C dataset is large (7.63GB for images.zip)
+- download_vddc.py script has resume capability for interrupted downloads
+- Uses tqdm for progress tracking
+- Downloads stored in sample_data/vdd-c/raw/ by default
+- Format of VDD-C annotations is compatible with YOLO training
 
 ## Known Challenges
 
@@ -73,7 +97,42 @@
 - Solution: Create dedicated .ssh directory with proper permissions instead of mounting
 - Status: Resolved with custom SSH directory approach
 
+### Large Dataset Management
+- Symptoms: Slow downloads, storage constraints
+- Solution: 
+  - Use download_vddc.py with resume capability
+  - Download only necessary components (--images --yolo-labels)
+  - Consider incremental processing
+- Status: Addressed with custom download script
+
 ## Project-Specific Intelligence
+
+### VDD-C Dataset
+- Contains 100,000+ annotated images of divers underwater
+- Sourced from videos taken in pools and Caribbean
+- Already annotated for diver detection
+- Includes challenging underwater conditions (visibility, particles, lighting)
+- Available formats:
+  - YOLO labels (yolo_labels.zip) - Use this for our project
+  - VOC labels (voc_labels.zip)
+  - TFRecord labels (tfrecord_labels.zip)
+  - TFSequence labels (multiple zip parts)
+- Published by researchers at University of Minnesota
+- Licensed under Creative Commons Attribution-ShareAlike 3.0
+
+### Download Script Usage
+- Command: `python download_vddc.py [options]`
+- Important options:
+  - `--images` - Download images.zip (7.63 GB)
+  - `--yolo-labels` - Download YOLO format labels (27.82 MB)
+  - `--readme` - Download README file (7.16 KB)
+  - `--all` - Download all components
+  - `--output-dir DIR` - Custom download location
+- Features:
+  - Resume capability for interrupted downloads
+  - Progress tracking with tqdm
+  - Download verification
+  - Automatic retry on failure
 
 ### Model Selection
 - YOLOv8n is a good starting point for testing (~6.3 MB size, 6.5 GFLOPs)
@@ -91,9 +150,10 @@
   - Light scattering effects
   - Particulates and bubbles
   - Variable visibility ranges
-- Dataset augmentation should account for these conditions
+- VDD-C dataset already contains these challenging conditions
+- Dataset augmentation may still be beneficial for specific conditions
 
 ### Testing Results
 - Default YOLOv8n model successfully detects persons in sample images
 - Detection time: ~48ms inference (not including pre/post-processing)
-- Next steps: test on actual underwater diver images 
+- Next steps: test on actual underwater diver images from VDD-C dataset 
