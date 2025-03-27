@@ -33,7 +33,7 @@
 	],
 
 	// Post-create commands to verify setup and configure SSH/Git
-	"postCreateCommand": "mkdir -p ~/.ssh-fixed && cp -p ${HOME}/.ssh/id_rsa ~/.ssh-fixed/ && cp -p ${HOME}/.ssh/id_rsa.pub ~/.ssh-fixed/ && cp -p ${HOME}/.ssh/known_hosts ~/.ssh-fixed/ 2>/dev/null || true && chmod 700 ~/.ssh-fixed && chmod 600 ~/.ssh-fixed/id_rsa ~/.ssh-fixed/known_hosts && echo 'StrictHostKeyChecking no' > ~/.ssh-fixed/config && chmod 600 ~/.ssh-fixed/config && git config --global core.sshCommand 'ssh -F /root/.ssh-fixed/config -i /root/.ssh-fixed/id_rsa' && echo 'SSH configured with proper permissions' && nvidia-smi",
+	// "postCreateCommand": "mkdir -p ~/.ssh-fixed && cp -p ${HOME}/.ssh/id_rsa ~/.ssh-fixed/ && cp -p ${HOME}/.ssh/id_rsa.pub ~/.ssh-fixed/ && cp -p ${HOME}/.ssh/known_hosts ~/.ssh-fixed/ 2>/dev/null || true && chmod 700 ~/.ssh-fixed && chmod 600 ~/.ssh-fixed/id_rsa ~/.ssh-fixed/known_hosts && echo 'StrictHostKeyChecking no' > ~/.ssh-fixed/config && chmod 600 ~/.ssh-fixed/config && git config --global core.sshCommand 'ssh -F /root/.ssh-fixed/config -i /root/.ssh-fixed/id_rsa' && echo 'SSH configured with proper permissions' && nvidia-smi",
 
 	// Set container capabilities for X11 and NVIDIA
 	"capAdd": ["SYS_ADMIN"],
