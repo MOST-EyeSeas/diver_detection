@@ -105,6 +105,7 @@ matplotlib>=3.2.0
 tensorboard>=2.4.0
 pytest>=6.0.0
 pycocotools>=2.0.2
+wandb>=0.17
 ```
 
 ### Deployment Dependencies

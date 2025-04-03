@@ -110,6 +110,11 @@
 - Set training epochs (started comparison with 50).
 - Use pretrained weights for faster convergence (e.g., `yolov11n.pt`, `yolov12n.pt`).
 - Monitor training with built-in tensorboard logging (`runs/train_*/diver_detection/`).
+- **Integrate with WandB for enhanced tracking:**
+  - Install WandB: `pip install wandb`
+  - Login: `wandb login` (requires API key)
+  - Enable in YOLO: `yolo settings wandb=True`
+  - Training command automatically logs to WandB using `project` and `name` arguments.
 - **Command for YOLOv11n comparison run:**
   ```bash
   yolo train model=yolov11n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v11n_e50 name=diver_detection

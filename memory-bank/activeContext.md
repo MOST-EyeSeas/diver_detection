@@ -21,6 +21,7 @@ We are now performing a **comparative evaluation of YOLOv11 and YOLOv12** for th
 15. **Initiated training runs for YOLOv11n and YOLOv12n (50 epochs).**
 16. **Updated `download_vddc.py` and `prepare_vddc.py` to include a `--no-progress` flag for environments without `tqdm`.**
 17. **Created `setup_dataset.sh` script to run download and preparation sequentially without progress bars.**
+18. **Configured WandB integration for experiment tracking (`yolo settings wandb=True`).**
 
 ## Current Tasks
 - [x] Set up Docker development environment
@@ -41,6 +42,7 @@ We are now performing a **comparative evaluation of YOLOv11 and YOLOv12** for th
 - [ ] Document comparison results and decision
 - [x] Update data scripts (`--no-progress`)
 - [x] Create dataset setup script (`setup_dataset.sh`)
+- [x] Configure WandB logging for training runs
 
 ## Next Steps
 

@@ -20,6 +20,7 @@
 | Dataset Setup Script | ✅ Created | `setup_dataset.sh` created |
 | YOLOv11n Training | ▶️ In Progress | 50 epoch run initiated (runs/train_v11n_e50/) |
 | YOLOv12n Training | ▶️ In Progress | 50 epoch run initiated (runs/train_v12n_e50/) |
+| WandB Integration | ✅ Configured | `yolo settings wandb=True` set, logged in |
 | Model Comparison | 🔄 Not Started | Pending completion of training runs |
 | Jetson Deployment | 🔄 Not Started | Future work |
 
@@ -160,6 +161,7 @@
 | YOLOv11/v12 Spec Documentation | Complete | ✅ Done |
 | YOLOv11n Training | Current | ▶️ In Progress |
 | YOLOv12n Training | Current | ▶️ In Progress |
+| WandB Setup | Complete | ✅ Done |
 | Performance Evaluation & Comparison | Next | 🔄 Not Started |
 | Model Selection | Next | 🔄 Not Started |
 | Optimization for Jetson | Future | 🔄 Not Started | 
