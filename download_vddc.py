@@ -20,7 +20,14 @@ import hashlib
 import time
 from pathlib import Path
 import requests
-from tqdm import tqdm
+
+# Conditional import of tqdm
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
+    tqdm = None  # Define tqdm as None if not available
 
 # Base URL for the VDD-C dataset
 BASE_URL = "https://conservancy.umn.edu/bitstream/handle/11299/219383"
@@ -67,6 +74,8 @@ def parse_args():
                       help='Number of retries for failed downloads')
     parser.add_argument('--retry-delay', type=int, default=5,
                       help='Delay between retries in seconds')
+    parser.add_argument('--no-progress', action='store_true',
+                        help='Disable progress bars (requires tqdm library)')
     
     args = parser.parse_args()
     
@@ -103,7 +112,7 @@ def verify_download(file_path, expected_md5):
         print(f"  Actual MD5:   {actual_md5}")
         return False
 
-def download_file(url, output_path, expected_size=None, expected_md5=None, retries=3, retry_delay=5):
+def download_file(url, output_path, expected_size=None, expected_md5=None, retries=3, retry_delay=5, no_progress=False):
     """
     Download a file with progress tracking and resume capability.
     
@@ -114,6 +123,7 @@ def download_file(url, output_path, expected_size=None, expected_md5=None, retri
         expected_md5: Expected MD5 checksum for verification
         retries: Number of retries for failed downloads
         retry_delay: Delay between retries in seconds
+        no_progress: Disable progress bar
     
     Returns:
         bool: True if download was successful, False otherwise
@@ -161,20 +171,38 @@ def download_file(url, output_path, expected_size=None, expected_md5=None, retri
                 else:
                     total_size = None  # Unknown size
             
-            # Display progress bar
-            with open(output_path, mode) as f:
-                with tqdm(
-                    total=total_size,
-                    initial=file_size,
-                    unit='B',
-                    unit_scale=True,
-                    unit_divisor=1024,
-                    desc=output_path.name
-                ) as pbar:
+            # Display progress bar or simple message
+            use_progress_bar = TQDM_AVAILABLE and not no_progress
+            
+            if use_progress_bar:
+                # Display progress bar using tqdm
+                with open(output_path, mode) as f:
+                    with tqdm(
+                        total=total_size,
+                        initial=file_size,
+                        unit='B',
+                        unit_scale=True,
+                        unit_divisor=1024,
+                        desc=output_path.name
+                    ) as pbar:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            if chunk:
+                                f.write(chunk)
+                                pbar.update(len(chunk))
+            else:
+                # Download without progress bar
+                print(f"Downloading {output_path.name}...")
+                downloaded_size = file_size
+                with open(output_path, mode) as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
-                            pbar.update(len(chunk))
+                            downloaded_size += len(chunk)
+                            if total_size:
+                                print(f"\rDownloaded {downloaded_size / (1024*1024):.2f} / {total_size / (1024*1024):.2f} MB", end="")
+                            else:
+                                print(f"\rDownloaded {downloaded_size / (1024*1024):.2f} MB", end="")
+                print()  # Newline after download completes
             
             # Verify download if MD5 is provided
             if expected_md5:
@@ -241,7 +269,8 @@ def main():
             expected_size=info['size'],
             expected_md5=info['md5'],
             retries=args.retries,
-            retry_delay=args.retry_delay
+            retry_delay=args.retry_delay,
+            no_progress=args.no_progress
         )
         
         results[component] = success

@@ -22,8 +22,36 @@ import zipfile
 import shutil
 import yaml
 from pathlib import Path
-from tqdm import tqdm
 import random
+
+# Conditional import of tqdm
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
+    tqdm = None  # Define tqdm as None if not available
+
+# Context manager to handle iteration with or without tqdm
+class MaybeTQDM:
+    def __init__(self, iterable, use_tqdm, **kwargs):
+        if use_tqdm and TQDM_AVAILABLE:
+            self.iterable = tqdm(iterable, **kwargs)
+        else:
+            self.iterable = iterable
+            self.kwargs = kwargs
+
+    def __iter__(self):
+        if 'desc' in self.kwargs:
+            print(f"{self.kwargs['desc']}...")
+        return iter(self.iterable)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if hasattr(self.iterable, 'close'):
+            self.iterable.close()
 
 def parse_args():
     """Parse command line arguments."""
@@ -40,6 +68,8 @@ def parse_args():
                       help='Ratio for train/validation split (default: 0.8)')
     parser.add_argument('--skip-verification', action='store_true',
                       help='Skip final YOLO compatibility verification')
+    parser.add_argument('--no-progress', action='store_true',
+                        help='Disable progress bars (requires tqdm library)')
     
     return parser.parse_args()
 
@@ -96,20 +126,32 @@ def create_directory_structure(output_dir, force=False):
     
     return True
 
-def extract_zip_with_progress(zip_path, extract_dir):
+def extract_zip_with_progress(zip_path, extract_dir, no_progress=False):
     """Extract a ZIP file with progress tracking."""
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         members = zip_ref.infolist()
         total_size = sum(m.file_size for m in members)
         extracted_size = 0
         
-        with tqdm(total=total_size, unit='B', unit_scale=True, unit_divisor=1024) as pbar:
+        use_tqdm = not no_progress and TQDM_AVAILABLE
+        
+        if use_tqdm:
+            with tqdm(total=total_size, unit='B', unit_scale=True, unit_divisor=1024, desc=f"Extracting {zip_path.name}") as pbar:
+                for member in members:
+                    zip_ref.extract(member, extract_dir)
+                    extracted_size += member.file_size
+                    pbar.update(member.file_size)
+        else:
+            print(f"Extracting {zip_path.name}...")
+            processed_files = 0
+            num_files = len(members)
             for member in members:
                 zip_ref.extract(member, extract_dir)
-                extracted_size += member.file_size
-                pbar.update(member.file_size)
+                processed_files += 1
+                print(f"\rProcessed {processed_files}/{num_files} files", end="")
+            print() # Newline after extraction completes
 
-def extract_dataset(input_dir, output_dir, force=False):
+def extract_dataset(input_dir, output_dir, force=False, no_progress=False):
     """Extract the dataset ZIP files to the appropriate locations."""
     print("Extracting dataset files...")
     input_dir = Path(input_dir)
@@ -131,16 +173,16 @@ def extract_dataset(input_dir, output_dir, force=False):
     
     # Extract images
     print("Extracting images.zip...")
-    extract_zip_with_progress(input_dir / "images.zip", temp_images_dir)
+    extract_zip_with_progress(input_dir / "images.zip", temp_images_dir, no_progress=no_progress)
     
     # Extract labels
     print("Extracting yolo_labels.zip...")
-    extract_zip_with_progress(input_dir / "yolo_labels.zip", temp_labels_dir)
+    extract_zip_with_progress(input_dir / "yolo_labels.zip", temp_labels_dir, no_progress=no_progress)
     
     print("Extraction completed successfully.")
     return temp_images_dir, temp_labels_dir
 
-def split_dataset(temp_images_dir, temp_labels_dir, output_dir, train_val_split=0.8):
+def split_dataset(temp_images_dir, temp_labels_dir, output_dir, train_val_split=0.8, no_progress=False):
     """Split the dataset into train and validation sets."""
     print(f"Organizing dataset with {train_val_split:.0%} train, {1-train_val_split:.0%} validation split...")
     
@@ -167,11 +209,11 @@ def split_dataset(temp_images_dir, temp_labels_dir, output_dir, train_val_split=
     
     # Process training images and labels
     train_success = process_dataset_split(train_images, temp_images_dir, temp_labels_dir, 
-                         output_dir, "train")
+                         output_dir, "train", no_progress)
     
     # Process validation images and labels
     val_success = process_dataset_split(val_images, temp_images_dir, temp_labels_dir, 
-                         output_dir, "val")
+                         output_dir, "val", no_progress)
     
     if not train_success or not val_success:
         print("⚠️ Warning: At least one split had no matching labels found.")
@@ -179,7 +221,7 @@ def split_dataset(temp_images_dir, temp_labels_dir, output_dir, train_val_split=
     
     return True
 
-def process_dataset_split(image_files, temp_images_dir, temp_labels_dir, output_dir, split_name):
+def process_dataset_split(image_files, temp_images_dir, temp_labels_dir, output_dir, split_name, no_progress=False):
     """Process and copy files for a specific dataset split (train/val)."""
     output_dir = Path(output_dir)
     images_dir = output_dir / "images" / split_name
@@ -190,38 +232,40 @@ def process_dataset_split(image_files, temp_images_dir, temp_labels_dir, output_
     labels_found = 0
     total_images = len(image_files)
     
-    for img_path in tqdm(image_files, desc=f"Copying {split_name} files"):
-        # Get relative path from the temp images directory
-        rel_path = img_path.relative_to(temp_images_dir)
-        
-        # Extract image filename and directory components
-        image_filename = img_path.name
-        image_stem = img_path.stem
-        rel_dir = str(rel_path.parent).replace('images/', '')
-        
-        # Build the correct label path using the image filename pattern
-        # The labels are organized in yolo/train, yolo/val, yolo/test directories
-        possible_label_paths = [
-            temp_labels_dir / "yolo" / "train" / f"{rel_dir}_{image_stem}.txt",
-            temp_labels_dir / "yolo" / "val" / f"{rel_dir}_{image_stem}.txt",
-            temp_labels_dir / "yolo" / "test" / f"{rel_dir}_{image_stem}.txt",
-            # Also check directories without directory prefix in case of direct matches
-            temp_labels_dir / "yolo" / "train" / f"{image_stem}.txt",
-            temp_labels_dir / "yolo" / "val" / f"{image_stem}.txt",
-            temp_labels_dir / "yolo" / "test" / f"{image_stem}.txt"
-        ]
-        
-        # Copy image
-        shutil.copy2(img_path, images_dir / image_filename)
-        
-        # Check all possible label paths and copy the first one found
-        label_found = False
-        for label_path in possible_label_paths:
-            if label_path.exists():
-                shutil.copy2(label_path, labels_dir / f"{image_stem}.txt")
-                labels_found += 1
-                label_found = True
-                break
+    # Iterate with or without tqdm
+    with MaybeTQDM(image_files, use_tqdm=(not no_progress), desc=f"Copying {split_name} files") as iterator:
+        for img_path in iterator:
+            # Get relative path from the temp images directory
+            rel_path = img_path.relative_to(temp_images_dir)
+            
+            # Extract image filename and directory components
+            image_filename = img_path.name
+            image_stem = img_path.stem
+            rel_dir = str(rel_path.parent).replace('images/', '')
+            
+            # Build the correct label path using the image filename pattern
+            # The labels are organized in yolo/train, yolo/val, yolo/test directories
+            possible_label_paths = [
+                temp_labels_dir / "yolo" / "train" / f"{rel_dir}_{image_stem}.txt",
+                temp_labels_dir / "yolo" / "val" / f"{rel_dir}_{image_stem}.txt",
+                temp_labels_dir / "yolo" / "test" / f"{rel_dir}_{image_stem}.txt",
+                # Also check directories without directory prefix in case of direct matches
+                temp_labels_dir / "yolo" / "train" / f"{image_stem}.txt",
+                temp_labels_dir / "yolo" / "val" / f"{image_stem}.txt",
+                temp_labels_dir / "yolo" / "test" / f"{image_stem}.txt"
+            ]
+            
+            # Copy image
+            shutil.copy2(img_path, images_dir / image_filename)
+            
+            # Check all possible label paths and copy the first one found
+            label_found = False
+            for label_path in possible_label_paths:
+                if label_path.exists():
+                    shutil.copy2(label_path, labels_dir / f"{image_stem}.txt")
+                    labels_found += 1
+                    label_found = True
+                    break
     
     print(f"Processed {total_images} images with {labels_found} matching labels for {split_name} set")
     return labels_found > 0
@@ -395,7 +439,7 @@ def main():
     
     # Extract dataset
     try:
-        temp_images_dir, temp_labels_dir = extract_dataset(args.input_dir, args.output_dir, args.force)
+        temp_images_dir, temp_labels_dir = extract_dataset(args.input_dir, args.output_dir, args.force, args.no_progress)
         
         # Verify label directory structure
         yolo_dir = temp_labels_dir / "yolo"
@@ -410,7 +454,7 @@ def main():
         return 1
     
     # Split dataset into train and validation sets
-    if not split_dataset(temp_images_dir, temp_labels_dir, args.output_dir, args.train_val_split):
+    if not split_dataset(temp_images_dir, temp_labels_dir, args.output_dir, args.train_val_split, args.no_progress):
         print("❌ Error: Failed to split dataset.")
         return 1
     

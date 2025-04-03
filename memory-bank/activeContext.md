@@ -17,8 +17,10 @@ We are now performing a **comparative evaluation of YOLOv11 and YOLOv12** for th
 11. **Decided to compare YOLOv11 vs YOLOv12 instead of initial v8 plan.**
 12. **Created specification files for YOLOv11 and YOLOv12 in `memory-bank/model-specs/`.**
 13. **Updated `ultralytics` package to latest version (`8.3.100`).**
-14. **Manually downloaded `yolov11n.pt` and `yolov12n.pt` pre-trained weights.**
+14. **Manually downloaded `yolo11n.pt` and `yolo12n.pt` pre-trained weights.**
 15. **Initiated training runs for YOLOv11n and YOLOv12n (50 epochs).**
+16. **Updated `download_vddc.py` and `prepare_vddc.py` to include a `--no-progress` flag for environments without `tqdm`.**
+17. **Created `setup_dataset.sh` script to run download and preparation sequentially without progress bars.**
 
 ## Current Tasks
 - [x] Set up Docker development environment
@@ -37,6 +39,8 @@ We are now performing a **comparative evaluation of YOLOv11 and YOLOv12** for th
 - [ ] Evaluate training results (mAP, speed, efficiency)
 - [ ] Select best model based on comparison
 - [ ] Document comparison results and decision
+- [x] Update data scripts (`--no-progress`)
+- [x] Create dataset setup script (`setup_dataset.sh`)
 
 ## Next Steps
 

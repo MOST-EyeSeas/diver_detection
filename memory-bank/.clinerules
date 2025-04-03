@@ -199,9 +199,10 @@
   - `--readme` - Download README file (7.16 KB)
   - `--all` - Download all components
   - `--output-dir DIR` - Custom download location
+  - `--no-progress` - Disable progress bar (if tqdm is unavailable)
 - Features:
   - Resume capability for interrupted downloads
-  - Progress tracking with tqdm
+  - Progress tracking with tqdm (optional)
   - Download verification
   - Automatic retry on failure
 
@@ -214,9 +215,10 @@
   - `--force` - Overwrite existing extracted files
   - `--train-val-split RATIO` - Custom train/validation split (default: 0.8)
   - `--skip-verification` - Skip final YOLO compatibility verification
+  - `--no-progress` - Disable progress bar (if tqdm is unavailable)
 - Features:
   - Download verification before extraction
-  - Progress tracking during extraction
+  - Progress tracking during extraction (optional)
   - Random train/val splitting
   - dataset.yaml generation
   - YOLO compatibility verification
@@ -227,6 +229,14 @@
   - Final dataset statistics:
     - 5,997 training images with labels
     - 5,763 validation images with labels
+
+### Dataset Setup Script
+- Command: `./setup_dataset.sh`
+- Purpose: Runs both download and preparation scripts sequentially.
+- Usage: Convenient way to download and prepare the dataset in environments without tqdm.
+- Executes:
+  - `python3 download_vddc.py --images --yolo-labels --no-progress`
+  - `python3 prepare_vddc.py --no-progress`
 
 ### YOLO Training Command
 - Basic training command:

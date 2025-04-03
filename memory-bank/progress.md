@@ -15,7 +15,9 @@
 | Dataset Download | ✅ Completed | VDD-C images and labels downloaded |
 | Dataset Preparation | ✅ Completed | VDD-C structured for YOLO training |
 | Model Specs Documentation | ✅ Completed | YOLOv11, YOLOv12 specs added to memory bank |
-| Pre-trained Weights | ✅ Downloaded | yolov11n.pt, yolov12n.pt downloaded |
+| Pre-trained Weights | ✅ Downloaded | yolo11n.pt, yolo12n.pt downloaded |
+| Dataset Scripts Update | ✅ Completed | Added `--no-progress` flag |
+| Dataset Setup Script | ✅ Created | `setup_dataset.sh` created |
 | YOLOv11n Training | ▶️ In Progress | 50 epoch run initiated (runs/train_v11n_e50/) |
 | YOLOv12n Training | ▶️ In Progress | 50 epoch run initiated (runs/train_v12n_e50/) |
 | Model Comparison | 🔄 Not Started | Pending completion of training runs |
@@ -44,6 +46,7 @@
   - Automatic retry for failed downloads
   - MD5 verification support
   - Command-line interface with flexible options
+  - Optional `--no-progress` flag for environments without tqdm
 - Successfully downloaded the complete dataset:
   - images.zip (8.38GB) - Main image files
   - yolo_labels.zip (6.06MB) - YOLO format labels
@@ -58,6 +61,7 @@
   - Verifies YOLO compatibility of the prepared dataset
   - Includes cleanup of temporary extraction directories
   - Provides command-line options for customization
+  - Optional `--no-progress` flag for environments without tqdm
 - Successfully prepared the dataset:
   - Processed 105,552 total images (84,441 training, 21,111 validation)
   - Matched labels for 83,858 training and 20,972 validation images
@@ -71,6 +75,9 @@
 - NVIDIA GPU is properly detected and accessible from the container
 - Terminal access and development tools are working as expected
 - Sample detection working on default images (bus.jpg, zidane.jpg)
+
+### Utility Scripts
+- `setup_dataset.sh`: Runs download and preparation scripts sequentially using `--no-progress`.
 
 ## What's Left to Build
 

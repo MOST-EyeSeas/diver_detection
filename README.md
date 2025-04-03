@@ -39,17 +39,32 @@ python download_vddc.py --images --yolo-labels
 python download_vddc.py --help
 ```
 
+### Preparing the Dataset
+
+After downloading the dataset components (e.g., `images.zip` and `yolo_labels.zip`), use the preparation script to extract and organize them into a YOLO-compatible format:
+
+```bash
+# Prepare the dataset using downloaded files
+python prepare_vddc.py
+
+# Verify downloaded files without extracting
+python prepare_vddc.py --verify-only
+
+# For help and more options
+python prepare_vddc.py --help
+```
+
 ## Commands
 
 ### Basic YOLO Testing
 
 ```bash
 # Test YOLO detection with visualization (may require manual download for v11/v12)
-# Replace yolov11n.pt with desired model (e.g., yolov12n.pt)
-yolo predict model=yolov11n.pt show=True
+# Replace yolo11n.pt with desired model (e.g., yolo12n.pt)
+yolo predict model=yolo11n.pt show=True
 
 # Test on specific source
-yolo predict model=yolov11n.pt source=path/to/image_or_folder show=True
+yolo predict model=yolo11n.pt source=path/to/image_or_folder show=True
 ```
 
 ### Model Training
@@ -61,10 +76,10 @@ yolo train model=yolov8n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=1
 # ---- Current Comparison Training Runs (YOLOv11 vs YOLOv12) ----
 
 # Train YOLOv11n (50 epochs)
-yolo train model=yolov11n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v11n_e50 name=diver_detection
+yolo train model=yolo11n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v11n_e50 name=diver_detection
 
 # Train YOLOv12n (50 epochs)
-yolo train model=yolov12n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v12n_e50 name=diver_detection
+yolo train model=yolo12n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v12n_e50 name=diver_detection
 ```
 
 ## References
