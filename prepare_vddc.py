@@ -39,7 +39,7 @@ class MaybeTQDM:
             self.iterable = tqdm(iterable, **kwargs)
         else:
             self.iterable = iterable
-            self.kwargs = kwargs
+        self.kwargs = kwargs
 
     def __iter__(self):
         if 'desc' in self.kwargs:
