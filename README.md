@@ -44,17 +44,27 @@ python download_vddc.py --help
 ### Basic YOLO Testing
 
 ```bash
-# Test YOLO detection with visualization
-yolo predict model=yolo11n.pt show=True
+# Test YOLO detection with visualization (may require manual download for v11/v12)
+# Replace yolov11n.pt with desired model (e.g., yolov12n.pt)
+yolo predict model=yolov11n.pt show=True
 
 # Test on specific source
-yolo predict model=yolo11n.pt source=path/to/image_or_folder show=True
+yolo predict model=yolov11n.pt source=path/to/image_or_folder show=True
 ```
 
+### Model Training
 
 ```bash
-# Train
+# Example: Fine-tune YOLOv8n for 100 epochs
 yolo train model=yolov8n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=100 imgsz=640
+
+# ---- Current Comparison Training Runs (YOLOv11 vs YOLOv12) ----
+
+# Train YOLOv11n (50 epochs)
+yolo train model=yolov11n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v11n_e50 name=diver_detection
+
+# Train YOLOv12n (50 epochs)
+yolo train model=yolov12n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v12n_e50 name=diver_detection
 ```
 
 ## References

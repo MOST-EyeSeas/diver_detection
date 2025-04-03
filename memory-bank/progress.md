@@ -6,15 +6,19 @@
 |-----------|--------|-------|
 | Development Environment | ✅ Operational | Docker container with GPU support configured |
 | X11 Forwarding | ✅ Configured | GUI visualization now working |
-| Base YOLO Framework | ✅ Verified | Successfully tested with default models |
+| Base YOLO Framework | ✅ Verified | Successfully tested default models, updated to 8.3.100 |
 | SSH/Git Configuration | ✅ Fixed | Now working with correct permissions |
 | CUDA Configuration | ✅ Resolved | GPU acceleration working properly |
-| Dataset Source | ✅ Identified | VDD-C dataset with 100,000+ annotated diver images |
-| Download Script | ✅ Created | Python script with resume capability for VDD-C download |
-| Dataset Preparation Script | ✅ Created | Python script to extract and organize dataset for YOLO |
-| Dataset Download | ✅ Completed | Downloaded images.zip (8.38GB) and yolo_labels.zip (6.06MB) |
-| Dataset Preparation | ✅ Completed | Successfully organized into YOLO-compatible structure |
-| Model Training | 🔄 Not Started | Ready to begin with prepared dataset |
+| Dataset Source | ✅ Identified | VDD-C dataset selected |
+| Download Script | ✅ Created | download_vddc.py operational |
+| Dataset Preparation Script | ✅ Created | prepare_vddc.py operational |
+| Dataset Download | ✅ Completed | VDD-C images and labels downloaded |
+| Dataset Preparation | ✅ Completed | VDD-C structured for YOLO training |
+| Model Specs Documentation | ✅ Completed | YOLOv11, YOLOv12 specs added to memory bank |
+| Pre-trained Weights | ✅ Downloaded | yolov11n.pt, yolov12n.pt downloaded |
+| YOLOv11n Training | ▶️ In Progress | 50 epoch run initiated (runs/train_v11n_e50/) |
+| YOLOv12n Training | ▶️ In Progress | 50 epoch run initiated (runs/train_v12n_e50/) |
+| Model Comparison | 🔄 Not Started | Pending completion of training runs |
 | Jetson Deployment | 🔄 Not Started | Future work |
 
 ## What Works
@@ -63,7 +67,7 @@
 
 ### Testing Capabilities
 - Basic YOLO inference using pre-trained models is functional
-- Successfully ran `yolo predict model=yolo11n.pt show=True` to test detection
+- Successfully ran `yolo predict model=yolo11n.pt show=True` to test detection (after manual download)
 - NVIDIA GPU is properly detected and accessible from the container
 - Terminal access and development tools are working as expected
 - Sample detection working on default images (bus.jpg, zidane.jpg)
@@ -71,33 +75,23 @@
 ## What's Left to Build
 
 ### High Priority (Current Sprint)
-1. **Initial Model Training**
-   - Configure YOLO for diver detection using prepared dataset
-   - Set up training parameters (batch size, epochs, learning rate)
-   - Run initial training with YOLOv8n model
-   - Monitor training progress and visualize metrics
-   - Evaluate baseline performance
+1. **Monitor Training Runs**
+   - Track YOLOv11n and YOLOv12n training progress.
 
-2. **Evaluation Framework**
-   - Create evaluation metrics for model assessment
-   - Set up automated testing pipeline
-   - Document performance benchmarks
-   - Test model on various underwater conditions
+2. **Evaluate & Compare Models**
+   - Once training finishes, collect and analyze performance metrics.
+   - Document results in a comparison table.
+   - Select the best model.
 
-3. **Model Optimization**
-   - Tune hyperparameters for improved performance
-   - Implement data augmentation for underwater conditions
-   - Explore model pruning techniques
-   - Optimize for specific detection challenges
+3. **Document Decision**
+   - Update Memory Bank with results and selection.
 
 ### Medium Priority
-1. **Pipeline Development**
-   - Develop preprocessing optimizations for underwater imagery
-   - Create post-processing for detection results
-   - Build visualization tools for analysis
-   - Implement real-time detection workflow
+1. **Pipeline Development & Optimization**
+   - If necessary, further optimize the chosen model.
+   - Develop full processing pipeline (preprocessing, postprocessing).
 
-2. **Documentation and Training**
+2. **Documentation and Examples**
    - Document the training process and results
    - Create instructions for model usage
    - Develop examples of inference with the trained model
@@ -125,7 +119,8 @@
 | SSH Permission Issues | Low | ✅ Resolved | Implemented custom SSH directory with correct permissions |
 | X11 Authorization | Low | ✅ Resolved | Added proper mount points and environment variables |
 | Dataset Size | Medium | ✅ Resolved | Successfully downloaded (8.38GB) and processed with prepare_vddc.py |
-| Label Matching | Medium | ✅ Resolved | Fixed path construction in prepare_vddc.py to properly match images with labels |
+| Label Matching | Medium | ✅ Resolved | Fixed path construction in prepare_vddc.py |
+| Model Weight Auto-Download | Low | ✅ Resolved (Workaround) | Newer models (v11, v12) required manual download via `wget`. Documented in `.clinerules`. |
 
 ## Notes and Observations
 
@@ -143,6 +138,7 @@
 - Label files in the VDD-C dataset are organized by:
   - Directory structure: yolo/train, yolo/val, yolo/test
   - Naming convention: [directory]_[image_name].txt
+- Training runs initiated for `yolov11n` and `yolov12n` (50 epochs).
 
 ## Upcoming Milestones
 
@@ -154,6 +150,9 @@
 | Dataset Download Scripts | Complete | ✅ Done |
 | Dataset Preparation Scripts | Complete | ✅ Done |
 | Dataset Download & Preparation | Complete | ✅ Done |
-| Initial Model Training | Week 3 | 🔄 Next Focus |
-| Performance Evaluation | Week 4 | 🔄 Not Started |
-| Optimization for Jetson | Week 6 | 🔄 Not Started | 
+| YOLOv11/v12 Spec Documentation | Complete | ✅ Done |
+| YOLOv11n Training | Current | ▶️ In Progress |
+| YOLOv12n Training | Current | ▶️ In Progress |
+| Performance Evaluation & Comparison | Next | 🔄 Not Started |
+| Model Selection | Next | 🔄 Not Started |
+| Optimization for Jetson | Future | 🔄 Not Started | 

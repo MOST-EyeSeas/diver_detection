@@ -11,14 +11,14 @@
   - Set `QT_X11_NO_MITSHM=1` to avoid shared memory issues
 
 ### YOLO-specific Patterns
-- Use `yolo predict model=yolo11n.pt show=True` to test basic inference with visualization
+- Use `yolo predict model=<model_name>.pt show=True` to test basic inference with visualization (e.g., `yolov11n.pt`, `yolov12n.pt`). Note: Newer models may require manual download first (see below).
 - For non-GUI operation, use `show=False` to disable visualization
 - Model files use `.pt` extension and are typically kept in the project root
 - Models are gitignored (not stored in version control)
 - Default source for inference is `/ultralytics/ultralytics/assets` with sample images
 - Specify custom source with `source=path/to/image_or_folder`
 - Default models detect 80 classes including person, can be used for initial diver testing
-- For training, use `yolo train model=yolov8n.pt data=path/to/dataset.yaml epochs=100 imgsz=640`
+- For training, use `yolo train model=<model_name>.pt data=path/to/dataset.yaml epochs=<num> imgsz=<size>`
 
 ### Dataset Patterns
 - VDD-C dataset is used for diver detection training
@@ -105,15 +105,21 @@
   - Final processed: 5,997 training, 5,763 validation images
 
 ### YOLO Training
-- Use the dataset.yaml file from prepared dataset
-- Configure appropriate batch size based on available GPU memory
-- Set training epochs (typically 50-100 for initial training)
-- Use pretrained weights for faster convergence (yolov8n.pt)
-- Monitor training with built-in tensorboard logging
+- Use the dataset.yaml file from prepared dataset (`sample_data/vdd-c/dataset/dataset.yaml`).
+- Configure appropriate batch size based on available GPU memory (started with 16).
+- Set training epochs (started comparison with 50).
+- Use pretrained weights for faster convergence (e.g., `yolov11n.pt`, `yolov12n.pt`).
+- Monitor training with built-in tensorboard logging (`runs/train_*/diver_detection/`).
+- **Command for YOLOv11n comparison run:**
+  ```bash
+  yolo train model=yolov11n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v11n_e50 name=diver_detection
+  ```
+- **Command for YOLOv12n comparison run:**
+  ```bash
+  yolo train model=yolov12n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v12n_e50 name=diver_detection
+  ```
 - Expected metrics to track:
-  - mAP (mean Average Precision)
-  - Precision and recall
-  - Loss values (box loss, class loss, etc.)
+  - mAP (mean Average Precision, mAP50-95, mAP50)
 
 ## Known Challenges
 
@@ -153,6 +159,19 @@
   - Modified prepare_vddc.py to check multiple possible label locations
   - Added support for checking in yolo/train, yolo/val, and yolo/test directories
 - Status: Resolved with improved label matching logic
+
+### Manual Model Weight Download (YOLOv11/v12)
+- Symptom: `FileNotFoundError` for `.pt` file during `yolo train` or `yolo predict` even with latest `ultralytics` package.
+- Solution: Manually download weights using `wget` before training.
+- Example commands:
+  ```bash
+  wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt
+  wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12n.pt
+  # May need to rename if *.pt.1 is created
+  mv yolo11n.pt.1 yolo11n.pt
+  mv yolo12n.pt.1 yolo12n.pt
+  ```
+- Status: Workaround implemented and successful.
 
 ## Project-Specific Intelligence
 
@@ -224,13 +243,16 @@
   - `device`: GPU device selection
 
 ### Model Selection
-- YOLOv8n is a good starting point for testing (~6.3 MB size, 6.5 GFLOPs)
+- **Current Comparison:** YOLOv11n vs YOLOv12n.
+- YOLOv11n: ~5.4MB (downloaded size)
+- YOLOv12n: ~5.3MB (downloaded size)
 - Initial tests with YOLOv8n successful on sample images
 - For Jetson deployment, models should be optimized for edge inference
-- Consider nano or small variants for resource-constrained environments
+- Nano variants (`n`) chosen for resource-constrained environments.
 
 ### Performance Expectations
 - Development GPU: YOLOv8n inference takes ~48ms per frame (~20 FPS) on test images
+- Expect YOLOv11n/v12n speeds to be in a similar range, but comparison needed.
 - Jetson target: 10-30 FPS depending on model size and optimization
 
 ### Underwater Conditions
@@ -245,4 +267,4 @@
 ### Testing Results
 - Default YOLOv8n model successfully detects persons in sample images
 - Detection time: ~48ms inference (not including pre/post-processing)
-- Next steps: train custom model on prepared VDD-C dataset 
+- **Next steps:** Evaluate fine-tuned YOLOv11n and YOLOv12n on VDD-C validation set. 
