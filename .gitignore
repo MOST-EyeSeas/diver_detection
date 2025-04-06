@@ -1,5 +1,7 @@
 *.pt
+*.zip
 sample_data/
 temp_*
 runs/
 wandb/
+rilov_data/
