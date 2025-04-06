@@ -82,18 +82,19 @@ yolo train model=yolo11n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=5
 yolo train model=yolo12n.pt data=sample_data/vdd-c/dataset/dataset.yaml epochs=50 imgsz=640 batch=16 device=0 project=runs/train_v12n_e50 name=diver_detection
 ```
 
+### Model Inference on Video
+
+After training, you can run inference on a video file using your best model.
+
+```bash
+# Example using the hypothetical best YOLOv11n model:
+yolo predict model=runs/train_v11n_e50/diver_detection/weights/best.pt source=path/to/your/video.mp4 show=True save=True
+```
 
 # Wandb
 ```bash
 yolo settings wandb=True
 ```
-
-
-# Example using the hypothetical best YOLOv11n model:
-```bash
-yolo predict model=runs/train_v11n_e50/diver_detection/weights/best.pt source=path/to/your/video.mp4 show=True save=True
-```
-
 
 ## References
 
