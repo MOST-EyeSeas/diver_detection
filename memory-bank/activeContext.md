@@ -1,7 +1,13 @@
 # Active Context: Diver Detection System
 
 ## Current Focus
-We are now performing a **comparative evaluation of YOLOv11 and YOLOv12** for the diver detection task. The goal is to identify the best model based on accuracy and efficiency using the prepared VDD-C dataset. Training runs for `yolov11n` and `yolov12n` have been initiated.
+We are now performing a **comprehensive 4-way comparison** of YOLOv11n and YOLOv12n models trained on both **original and enhanced underwater datasets**. This expanded comparison will determine the optimal combination of model architecture and image preprocessing for underwater diver detection.
+
+**Comparison Matrix:**
+1. YOLOv11n + Original Dataset
+2. YOLOv11n + Enhanced Dataset (aneris_enhance)
+3. YOLOv12n + Original Dataset  
+4. YOLOv12n + Enhanced Dataset (aneris_enhance)
 
 ## Recent Changes
 1. Set up the development container with required dependencies
@@ -18,10 +24,18 @@ We are now performing a **comparative evaluation of YOLOv11 and YOLOv12** for th
 12. **Created specification files for YOLOv11 and YOLOv12 in `memory-bank/model-specs/`.**
 13. **Updated `ultralytics` package to latest version (`8.3.100`).**
 14. **Manually downloaded `yolo11n.pt` and `yolo12n.pt` pre-trained weights.**
-15. **Initiated training runs for YOLOv11n and YOLOv12n (50 epochs).**
-16. **Updated `download_vddc.py` and `prepare_vddc.py` to include a `--no-progress` flag for environments without `tqdm`.**
-17. **Created `setup_dataset.sh` script to run download and preparation sequentially without progress bars.**
-18. **Configured WandB integration for experiment tracking (`yolo settings wandb=True`).**
+15. **Updated `download_vddc.py` and `prepare_vddc.py` to include a `--no-progress` flag for environments without `tqdm`.**
+16. **Created `setup_dataset.sh` script to run download and preparation sequentially without progress bars.**
+17. **Configured WandB integration for experiment tracking (`yolo settings wandb=True`).**
+18. **✅ PHASE 2 COMPLETED: Implemented dataset enhancement pipeline using aneris_enhance**
+19. **✅ Successfully enhanced entire VDD-C dataset (11,752 images total: 5,996 training + 5,756 validation)**
+20. **✅ Created comprehensive batch enhancement script (`enhance_dataset.py`) with tqdm progress bars**
+21. **✅ Enhancement achieved 8.2 FPS processing speed with 100% success rate**
+22. **✅ Created enhanced dataset structure maintaining YOLO compatibility**
+23. **✅ Integrated aneris_enhance underwater image processing (red channel correction + contrast stretching)**
+24. **✅ Created comprehensive results comparison script (`compare_results.py`)**
+25. **✅ Established 4-way training comparison infrastructure**
+26. **⚡ Initiated YOLOv11n Original Dataset training (1 epoch completed, mAP50=0.693)**
 
 ## Current Tasks
 - [x] Set up Docker development environment
@@ -36,78 +50,101 @@ We are now performing a **comparative evaluation of YOLOv11 and YOLOv12** for th
 - [x] Document YOLOv11 and YOLOv12 specs
 - [x] Update ultralytics package
 - [x] Download required pre-trained weights (v11n, v12n)
-- [▶️] Run comparative training for YOLOv11n and YOLOv12n (In Progress)
-- [ ] Evaluate training results (mAP, speed, efficiency)
-- [ ] Select best model based on comparison
-- [ ] Document comparison results and decision
 - [x] Update data scripts (`--no-progress`)
 - [x] Create dataset setup script (`setup_dataset.sh`)
 - [x] Configure WandB logging for training runs
+- [x] **Phase 2: Create dataset enhancement pipeline**
+- [x] **Phase 2: Enhance entire VDD-C dataset with aneris_enhance**
+- [x] **Phase 2: Create enhanced dataset structure and configuration**
+- [x] **Phase 3: Create training comparison infrastructure**
+- [x] **Phase 3: Create results analysis and comparison scripts**
+- [▶️] **Phase 3: Execute 4-way training comparison (In Progress)**
+- [ ] **Phase 4: Evaluate and compare all training results**
+- [ ] **Phase 4: Select optimal model/enhancement combination**
+- [ ] **Phase 4: Test best model on external video**
+- [ ] **Phase 5: Jetson deployment preparation**
 
 ## Next Steps
 
 ### Immediate Next Steps (Current Sprint)
-1. **Monitor Training Runs**
-   - Observe progress of YOLOv11n and YOLOv12n training.
-   - Ensure runs complete successfully.
+1. **Complete 4-Way Training Comparison**
+   - Download remaining pre-trained weights if needed
+   - Execute remaining 3 training runs:
+     * YOLOv11n Enhanced Dataset
+     * YOLOv12n Original Dataset  
+     * YOLOv12n Enhanced Dataset
+   - Monitor all training runs to completion (50 epochs each)
 
-2. **Results Evaluation & Comparison**
-   - Once training completes, collect performance metrics (mAP, Precision, Recall, Speed, Size, GFLOPs) from `runs/train_v11n_e50/diver_detection/` and `runs/train_v12n_e50/diver_detection/`.
-   - Create comparison table (e.g., in `memory-bank/model-comparison-v11-v12.md`).
-   - Analyze trade-offs between accuracy and efficiency.
+2. **Comprehensive Results Analysis**
+   - Use `compare_results.py --save-plots` to generate complete comparison
+   - Analyze enhancement impact on both model architectures
+   - Compare YOLOv11n vs YOLOv12n performance across datasets
+   - Document findings in Memory Bank
 
-3. **Model Selection & Documentation**
-   - Choose the best performing model for the diver detection task, considering Jetson deployment constraints.
-   - Update Memory Bank (`activeContext.md`, `progress.md`, `.clinerules`, comparison file) with the decision and results.
+3. **Model Selection & Validation**
+   - Select best performing model/dataset combination
+   - Test chosen model on user's external video (qualitative assessment)
+   - Document final recommendation with deployment considerations
 
-### Upcoming Priorities
-1. **Further Model Optimization (If needed)**
-   - Based on comparison results, potentially fine-tune the chosen model further (e.g., more epochs, hyperparameter tuning).
-   - Consider data augmentation specific to underwater conditions.
+### Medium Priority (Next Phase)
+1. **Extended Comparisons (Future Work)**
+   - Compare against YOLOv10n for broader model evaluation
+   - Experiment with longer training (100+ epochs) for best model
+   - Test different enhancement parameters or techniques
+   - Evaluate other model sizes (s, m variants) if needed
 
-2. **Jetson Deployment Preparation**
-   - Prepare testing environment for Jetson deployment
-   - Identify optimization requirements for edge deployment
-   - Establish benchmarking process
-   - Plan for TensorRT conversion
+2. **Deployment Optimization**
+   - TensorRT optimization for chosen model
+   - Jetson-specific performance benchmarking
+   - Real-time inference pipeline development
 
 ## Active Decisions and Considerations
 
 ### Current Decision Points
-1. **Dataset Selection**
-   - ✅ Selected VDD-C dataset.
-   - ✅ Successfully prepared dataset (5,997 train / 5,763 val images).
+1. **Dataset Selection & Enhancement**
+   - ✅ Selected VDD-C dataset (5,996 training + 5,756 validation images)
+   - ✅ Successfully enhanced dataset using aneris_enhance (red channel correction + contrast stretching)
+   - ✅ Created parallel dataset structures for fair comparison
 
-2. **YOLO Version Selection**
-   - ✅ Decided to compare **YOLOv11n vs YOLOv12n** based on latest advancements and potential performance benefits.
-   - Documentation created for both versions.
-   - Comparison training initiated.
+2. **Model Architecture Comparison**
+   - ✅ Decided on **4-way comparison**: YOLOv11n/v12n × Original/Enhanced datasets
+   - ✅ Using nano variants for Jetson deployment compatibility
+   - ✅ Standardized training parameters (50 epochs, batch=16, imgsz=640)
 
-3. **Training Approach**
-   - ✅ Fine-tuning from pre-trained `yolov11n.pt` and `yolov12n.pt` weights.
-   - ✅ Single-class (diver) detection.
-   - ✅ Initial comparison run: 50 epochs, batch size 16, imgsz 640.
+3. **Enhancement Strategy**
+   - ✅ Implemented aneris_enhance underwater image processing
+   - ✅ Achieved 8.2 FPS enhancement speed with 100% success rate
+   - ✅ Maintained label compatibility (bounding boxes unchanged)
 
-### Known Challenges
+4. **Training Infrastructure**
+   - ✅ YOLO automatic logging and results tracking
+   - ✅ Comprehensive comparison and analysis scripts
+   - ✅ WandB integration for cloud experiment tracking
+
+### Known Challenges & Solutions
 1. **Underwater Image Characteristics**
-   - Color distortion and limited visibility
-   - Variable lighting conditions
-   - Bubbles and particulates creating visual noise
-   - VDD-C dataset provides good representation of these challenges
+   - Challenge: Color distortion, limited visibility, particulates
+   - Solution: aneris_enhance preprocessing pipeline addresses these issues
+   - Validation: Statistical improvement (brightness 116.5→147.0, better contrast)
 
-2. **Class Imbalance**
-   - Some underwater scenes may have multiple divers while others have single divers
-   - Need to ensure balanced loss function and evaluation metrics
-   - Consider specialized detection approaches for small/distant divers
+2. **Training Scale & Time**
+   - Challenge: 4 training runs × 50 epochs = 8-16 hours total
+   - Solution: YOLO automatic checkpointing allows resumable training
+   - Mitigation: Can analyze results incrementally as runs complete
 
-3. **Jetson Deployment Considerations**
-   - Nano ('n') variants of YOLOv11/v12 chosen for efficiency.
-   - Final comparison needs to weigh accuracy against inference speed and model size suitable for Jetson.
+3. **Comparison Complexity**
+   - Challenge: 4-dimensional comparison matrix (2 models × 2 datasets)
+   - Solution: Automated comparison script with visualizations and analysis
+   - Benefit: Clear quantitative and qualitative assessment tools
 
-4. **Real-time Processing Requirements**
-   - Balancing detection accuracy with processing speed
-   - Managing input pipeline for consistent frame rate
-   - Handling variable processing loads
+4. **Jetson Deployment Considerations**
+   - Challenge: Balance between accuracy and inference speed
+   - Strategy: Nano variants chosen, TensorRT optimization planned
+   - Decision: Will prioritize real-world performance over benchmark scores
 
-5. **Model Weight Availability**
-   - ❗ Newer models (YOLOv11, YOLOv12) might require manual download of `.pt` files, unlike older versions automatically fetched by the library. Need to use direct download links. 
+## Future Expansion Plans
+- **Extended Model Comparison**: YOLOv10n, different model sizes
+- **Training Optimization**: Longer epochs, hyperparameter tuning
+- **Enhancement Variations**: Different preprocessing techniques
+- **Deployment Modes**: Edge optimization, real-time streaming
+- **Application Integration**: ROV/underwater vehicle integration 
