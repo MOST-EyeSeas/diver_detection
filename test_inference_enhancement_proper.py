@@ -226,7 +226,7 @@ def analyze_results(results):
         print("   - Need to test on external underwater video for clearer benefits")
     
     # Save results
-    csv_filename = "inference_enhancement_test_results_CORRECTED.csv"
+    csv_filename = "inference_enhancement_test_results_150epochs.csv"
     df.to_csv(csv_filename, index=False)
     print(f"\n📁 Results saved to: {csv_filename}")
     
@@ -243,23 +243,15 @@ def main():
     
     args = parser.parse_args()
     
-    # Define models to test
+    # Define models to test - 150-epoch extended training models
     models_config = [
         {
-            'name': 'YOLOv11n Original-Trained',
-            'path': f'{args.models_dir}/v11n_original/weights/best.pt'
+            'name': 'YOLOv11n Original-150ep',
+            'path': f'runs/extended/v11n_original_100ep/weights/best.pt'
         },
         {
-            'name': 'YOLOv11n Enhanced-Trained-FIXED', 
-            'path': f'{args.models_dir}/v11n_enhanced_FIXED/weights/best.pt'
-        },
-        {
-            'name': 'YOLOv12n Original-Trained',
-            'path': f'{args.models_dir}/v12n_original/weights/best.pt'
-        },
-        {
-            'name': 'YOLOv12n Enhanced-Trained-FIXED',
-            'path': f'{args.models_dir}/v12n_enhanced_FIXED/weights/best.pt'
+            'name': 'YOLOv11n Enhanced-150ep', 
+            'path': f'runs/extended/v11n_enhanced_100ep/weights/best.pt'
         }
     ]
     
@@ -304,7 +296,7 @@ def main():
             print("2. Validation set quality might be high enough to minimize enhancement impact")
             print("3. Real-world testing will show practical deployment benefits")
         
-        print(f"\n📝 All results saved to: inference_enhancement_test_results_CORRECTED.csv")
+        print(f"\n📝 All results saved to: inference_enhancement_test_results_150epochs.csv")
     else:
         print("❌ No results obtained. Please check model paths and dataset structure.")
         return 1
