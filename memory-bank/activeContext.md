@@ -1,13 +1,18 @@
 # Active Context: Diver Detection System
 
 ## Current Focus
-We are now performing a **comprehensive 4-way comparison** of YOLOv11n and YOLOv12n models trained on both **original and enhanced underwater datasets**. This expanded comparison will determine the optimal combination of model architecture and image preprocessing for underwater diver detection.
+We are **restarting with methodologically correct approach** after identifying a critical flaw in our original methodology. The previous 4-way comparison used validation data that models had seen during training, creating data leakage and making inference enhancement testing invalid.
 
-**Comparison Matrix:**
-1. YOLOv11n + Original Dataset
-2. YOLOv11n + Enhanced Dataset (aneris_enhance)
-3. YOLOv12n + Original Dataset  
-4. YOLOv12n + Enhanced Dataset (aneris_enhance)
+**New Methodology:**
+1. **Proper Dataset Split**: Create train/val/test (60/20/20) with held-out test set
+2. **Clean Training**: Models never see test set during training or validation  
+3. **Unbiased Testing**: Test inference enhancement on truly unseen data
+4. **Real-world Validation**: Test on user's external underwater video
+
+**Previous Results (Invalid due to Data Leakage):**
+- YOLOv11n Enhanced: 0.972 mAP50 (but tested on validation data seen during training)
+- YOLOv12n Original: 0.971 mAP50 (same issue)
+- Enhancement benefits appeared minimal due to testing on "easy" validation data
 
 ## Recent Changes
 1. Set up the development container with required dependencies
@@ -35,9 +40,13 @@ We are now performing a **comprehensive 4-way comparison** of YOLOv11n and YOLOv
 23. **✅ Integrated aneris_enhance underwater image processing (red channel correction + contrast stretching)**
 24. **✅ Created comprehensive results comparison script (`compare_results.py`)**
 25. **✅ Established 4-way training comparison infrastructure**
-26. **⚡ Initiated YOLOv11n Original Dataset training (1 epoch completed, mAP50=0.693)**
+26. **✅ COMPLETED 4-way training comparison (50 epochs each)**
+27. **🔍 IDENTIFIED METHODOLOGICAL FLAW: Data leakage in inference enhancement testing**
+28. **🔄 RESTARTING: Created proper train/val/test split methodology**
+29. **✅ Created `prepare_vddc_proper.py` for methodologically sound dataset splits**
+30. **✅ Created `enhance_dataset_proper.py` for enhancement with held-out test set**
 
-## Current Tasks
+## Current Tasks (Restarted with Proper Methodology)
 - [x] Set up Docker development environment
 - [x] Configure GPU access in container
 - [x] Fix X11 forwarding for visualization
@@ -58,33 +67,50 @@ We are now performing a **comprehensive 4-way comparison** of YOLOv11n and YOLOv
 - [x] **Phase 2: Create enhanced dataset structure and configuration**
 - [x] **Phase 3: Create training comparison infrastructure**
 - [x] **Phase 3: Create results analysis and comparison scripts**
-- [▶️] **Phase 3: Execute 4-way training comparison (In Progress)**
-- [ ] **Phase 4: Evaluate and compare all training results**
-- [ ] **Phase 4: Select optimal model/enhancement combination**
-- [ ] **Phase 4: Test best model on external video**
+- [x] **Phase 3: Execute 4-way training comparison (COMPLETED - Invalid)**
+- [x] **🔍 Identify methodological issues with data leakage**
+- [x] **🔄 Create proper dataset preparation scripts**
+- [ ] **Phase 4A: Create proper train/val/test split (60/20/20)**
+- [ ] **Phase 4B: Create enhanced version of proper dataset**
+- [ ] **Phase 4C: Retrain models on proper splits (4-way comparison)**
+- [ ] **Phase 4D: Test inference enhancement on held-out test set**
+- [ ] **Phase 4E: Test best models on external underwater video**
 - [ ] **Phase 5: Jetson deployment preparation**
 
 ## Next Steps
 
-### Immediate Next Steps (Current Sprint)
-1. **Complete 4-Way Training Comparison**
-   - Download remaining pre-trained weights if needed
-   - Execute remaining 3 training runs:
-     * YOLOv11n Enhanced Dataset
-     * YOLOv12n Original Dataset  
-     * YOLOv12n Enhanced Dataset
-   - Monitor all training runs to completion (50 epochs each)
+### Immediate Next Steps (Methodologically Correct Approach)
+1. **Create Proper Dataset Split**
+   ```bash
+   python prepare_vddc_proper.py --force
+   ```
+   - Creates train/val/test (60/20/20) with held-out test set
+   - Test set NEVER seen during training or validation
+   - Reproducible split with fixed random seed
 
-2. **Comprehensive Results Analysis**
-   - Use `compare_results.py --save-plots` to generate complete comparison
-   - Analyze enhancement impact on both model architectures
-   - Compare YOLOv11n vs YOLOv12n performance across datasets
-   - Document findings in Memory Bank
+2. **Create Enhanced Version**
+   ```bash
+   python enhance_dataset_proper.py --force
+   ```
+   - Enhance images while maintaining proper split structure
+   - Parallel processing for efficiency
+   - Maintains same train/val/test boundaries
 
-3. **Model Selection & Validation**
-   - Select best performing model/dataset combination
-   - Test chosen model on user's external video (qualitative assessment)
-   - Document final recommendation with deployment considerations
+3. **Retrain Models (Clean 4-Way Comparison)**
+   - YOLOv11n + Original Proper Dataset
+   - YOLOv11n + Enhanced Proper Dataset
+   - YOLOv12n + Original Proper Dataset
+   - YOLOv12n + Enhanced Proper Dataset
+   - Use only train+val for training, hold out test completely
+
+4. **Unbiased Inference Enhancement Testing**
+   - Test on held-out test set (never seen during training)
+   - Compare original vs enhanced preprocessing during inference
+   - This should show definitive enhancement advantages
+
+5. **Real-World Validation**
+   - Test best models on user's external underwater video
+   - Qualitative assessment of enhancement benefits
 
 ### Medium Priority (Next Phase)
 1. **Extended Comparisons (Future Work)**
