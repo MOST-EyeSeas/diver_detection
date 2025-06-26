@@ -75,10 +75,11 @@ names: ['diver']
         return None
 
 def test_inference_enhancement(models_config, dataset_dir, enhanced_dataset_dir):
-    """Test inference enhancement on all models."""
+    """Test inference enhancement on all models - proper domain matching only."""
     print("INFERENCE ENHANCEMENT TESTING ON HELD-OUT TEST SET")
     print("=" * 60)
     print("Testing enhancement benefits on truly unseen data (no data leakage)")
+    print("⚠️  DOMAIN MATCHING: Original models tested on original images, enhanced on enhanced")
     print()
     
     # Paths
@@ -112,8 +113,12 @@ def test_inference_enhancement(models_config, dataset_dir, enhanced_dataset_dir)
         
     all_results = []
     
-    # Test each model on both original and enhanced test sets
-    for model_info in models_config:
+    # Separate models by training type
+    original_models = [m for m in models_config if 'Original' in m['name']]
+    enhanced_models = [m for m in models_config if 'Enhanced' in m['name']]
+    
+    # Test original models on original images only
+    for model_info in original_models:
         model_path = model_info['path']
         model_name = model_info['name']
         
@@ -122,115 +127,143 @@ def test_inference_enhancement(models_config, dataset_dir, enhanced_dataset_dir)
             continue
         
         print(f"\n{'='*80}")
-        print(f"TESTING MODEL: {model_name}")
+        print(f"TESTING ORIGINAL MODEL: {model_name}")
         print(f"{'='*80}")
         
-        # Test on original test images
         original_result = run_model_validation(
             model_path, original_test_images, test_labels, 
             model_name, "Original"
         )
         
-        # Test on enhanced test images  
+        if original_result:
+            all_results.append(original_result)
+    
+    # Test enhanced models on enhanced images only  
+    for model_info in enhanced_models:
+        model_path = model_info['path']
+        model_name = model_info['name']
+        
+        if not os.path.exists(model_path):
+            print(f"Warning: Model not found: {model_path}")
+            continue
+        
+        print(f"\n{'='*80}")
+        print(f"TESTING ENHANCED MODEL: {model_name}")
+        print(f"{'='*80}")
+        
         enhanced_result = run_model_validation(
             model_path, enhanced_test_images, test_labels,
             model_name, "Enhanced"
         )
         
-        if original_result and enhanced_result:
-            all_results.extend([original_result, enhanced_result])
-            
-            # Calculate improvement
-            metrics_to_compare = ['mAP50', 'mAP50-95', 'precision', 'recall']
-            print(f"\n📊 ENHANCEMENT IMPACT for {model_name}:")
-            for metric in metrics_to_compare:
-                original_val = original_result[metric]
-                enhanced_val = enhanced_result[metric]
-                delta = enhanced_val - original_val
-                percent_change = (delta / original_val) * 100 if original_val > 0 else 0
-                
-                status = "📈" if delta > 0 else "📉" if delta < 0 else "➡️"
-                print(f"  {status} {metric}: {original_val:.3f} → {enhanced_val:.3f} "
-                      f"(Δ{delta:+.3f}, {percent_change:+.1f}%)")
+        if enhanced_result:
+            all_results.append(enhanced_result)
     
     return all_results
 
 def analyze_results(results):
-    """Analyze and summarize all results."""
+    """Analyze and summarize all results - proper enhancement comparison."""
     if not results:
         print("No results to analyze")
         return
     
     print(f"\n{'='*80}")
-    print("COMPREHENSIVE ANALYSIS - INFERENCE ENHANCEMENT BENEFITS")
+    print("COMPREHENSIVE ANALYSIS - ENHANCEMENT BENEFITS")
     print(f"{'='*80}")
     
     # Create DataFrame for analysis
     df = pd.DataFrame(results)
     
-    # Group by model for comparison
-    models = df['model_name'].unique()
-    
     print("\n📊 DETAILED RESULTS TABLE:")
     print(df.to_string(index=False, float_format='%.3f'))
     
-    print(f"\n🎯 ENHANCEMENT IMPACT SUMMARY:")
+    print(f"\n🎯 ENHANCEMENT IMPACT ANALYSIS:")
     print("-" * 50)
     
-    significant_improvements = []
+    # Separate original and enhanced results
+    original_results = df[df['test_type'] == 'Original']
+    enhanced_results = df[df['test_type'] == 'Enhanced']
     
-    for model in models:
-        model_data = df[df['model_name'] == model]
-        if len(model_data) != 2:
-            continue
-            
-        original = model_data[model_data['test_type'] == 'Original'].iloc[0]
-        enhanced = model_data[model_data['test_type'] == 'Enhanced'].iloc[0]
+    # Group by base model name (remove "Original-150ep" or "Enhanced-150ep")
+    enhancement_comparisons = []
+    
+    for _, orig_row in original_results.iterrows():
+        # Find corresponding enhanced model
+        base_model = orig_row['model_name'].replace(' Original-150ep', '')
+        enhanced_model_name = base_model + ' Enhanced-150ep'
         
-        print(f"\n🏷️ {model}:")
+        enhanced_match = enhanced_results[enhanced_results['model_name'] == enhanced_model_name]
         
-        metrics = ['mAP50', 'mAP50-95', 'precision', 'recall']
-        model_improvements = []
-        
-        for metric in metrics:
-            orig_val = original[metric]
-            enh_val = enhanced[metric]
-            delta = enh_val - orig_val
-            percent = (delta / orig_val) * 100 if orig_val > 0 else 0
+        if not enhanced_match.empty:
+            enh_row = enhanced_match.iloc[0]
             
-            status = "📈" if delta > 0.001 else "📉" if delta < -0.001 else "➡️"
+            print(f"\n🏷️ {base_model} Enhancement Analysis:")
+            print(f"   Original Model → Original Images: {orig_row['mAP50']:.3f} mAP50, {orig_row['mAP50-95']:.3f} mAP50-95")
+            print(f"   Enhanced Model → Enhanced Images: {enh_row['mAP50']:.3f} mAP50, {enh_row['mAP50-95']:.3f} mAP50-95")
             
-            print(f"  {status} {metric}: {orig_val:.3f} → {enh_val:.3f} "
-                  f"(Δ{delta:+.3f}, {percent:+.1f}%)")
+            # Calculate enhancement benefit
+            metrics = ['mAP50', 'mAP50-95', 'precision', 'recall']
+            model_improvements = []
             
-            if delta > 0.001:  # Improvement threshold
-                model_improvements.append((metric, delta, percent))
-        
-        if model_improvements:
-            significant_improvements.extend([(model, metric, delta, percent) 
-                                           for metric, delta, percent in model_improvements])
+            for metric in metrics:
+                orig_val = orig_row[metric]
+                enh_val = enh_row[metric]
+                delta = enh_val - orig_val
+                percent = (delta / orig_val) * 100 if orig_val > 0 else 0
+                
+                status = "📈" if delta > 0.001 else "📉" if delta < -0.001 else "➡️"
+                
+                print(f"   {status} {metric}: {orig_val:.3f} → {enh_val:.3f} "
+                      f"(Δ{delta:+.3f}, {percent:+.1f}%)")
+                
+                if delta > 0.001:  # Improvement threshold
+                    model_improvements.append((metric, delta, percent))
+            
+            if model_improvements:
+                enhancement_comparisons.extend([(base_model, metric, delta, percent) 
+                                              for metric, delta, percent in model_improvements])
     
     # Overall summary
     print(f"\n🎉 ENHANCEMENT BENEFITS SUMMARY:")
     print("-" * 40)
     
-    if significant_improvements:
-        print(f"✅ Found {len(significant_improvements)} significant improvements!")
-        for model, metric, delta, percent in significant_improvements:
+    if enhancement_comparisons:
+        print(f"✅ Found {len(enhancement_comparisons)} significant improvements!")
+        for model, metric, delta, percent in enhancement_comparisons:
             print(f"  • {model}: {metric} improved by {delta:+.3f} ({percent:+.1f}%)")
+        
+        # Key insights
+        print(f"\n🔬 KEY INSIGHTS:")
+        map50_95_improvements = [(model, delta, percent) for model, metric, delta, percent 
+                                in enhancement_comparisons if metric == 'mAP50-95']
+        
+        if map50_95_improvements:
+            print("   Enhancement benefits confirmed on held-out test set:")
+            for model, delta, percent in map50_95_improvements:
+                print(f"   • {model}: +{delta:.3f} mAP50-95 ({percent:+.1f}%)")
+            
+            # Scaling analysis
+            nano_improvement = next((delta for model, delta, percent in map50_95_improvements 
+                                   if 'v11n' in model.lower()), 0)
+            small_improvement = next((delta for model, delta, percent in map50_95_improvements 
+                                    if 'v11s' in model.lower()), 0)
+            
+            if nano_improvement > 0 and small_improvement > 0:
+                scaling_factor = small_improvement / nano_improvement
+                print(f"   🚀 Capacity amplification: {scaling_factor:.1f}x larger benefit with YOLOv11s")
+        
     else:
         print("❓ No significant improvements detected in this test")
         print("   This could mean:")
-        print("   - Test set was not challenging enough for enhancement benefits")
-        print("   - Enhancement benefits are more apparent in real-world conditions")
-        print("   - Need to test on external underwater video for clearer benefits")
+        print("   - Enhancement benefits are dataset-specific")
+        print("   - Need real-world testing for practical validation")
     
     # Save results
-    csv_filename = "inference_enhancement_test_results_150epochs.csv"
+    csv_filename = "inference_enhancement_test_results_proper.csv"
     df.to_csv(csv_filename, index=False)
     print(f"\n📁 Results saved to: {csv_filename}")
     
-    return significant_improvements
+    return enhancement_comparisons
 
 def main():
     parser = argparse.ArgumentParser(description='Test inference enhancement on held-out test set')
@@ -243,15 +276,23 @@ def main():
     
     args = parser.parse_args()
     
-    # Define models to test - 150-epoch extended training models
+    # Define models to test - including new YOLOv11s models
     models_config = [
         {
             'name': 'YOLOv11n Original-150ep',
-            'path': f'runs/extended/v11n_original_100ep/weights/best.pt'
+            'path': f'runs/proper_comparison/v11n_original/weights/best.pt'
         },
         {
             'name': 'YOLOv11n Enhanced-150ep', 
-            'path': f'runs/extended/v11n_enhanced_100ep/weights/best.pt'
+            'path': f'runs/proper_comparison/v11n_enhanced_FIXED/weights/best.pt'
+        },
+        {
+            'name': 'YOLOv11s Original-150ep',
+            'path': f'runs/larger_models/v11s_original3/weights/best.pt'
+        },
+        {
+            'name': 'YOLOv11s Enhanced-150ep', 
+            'path': f'runs/larger_models/v11s_enhanced2/weights/best.pt'
         }
     ]
     
