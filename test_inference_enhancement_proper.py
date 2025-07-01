@@ -293,6 +293,14 @@ def main():
         {
             'name': 'YOLOv11s Enhanced-150ep', 
             'path': f'runs/larger_models/v11s_enhanced2/weights/best.pt'
+        },
+        {
+            'name': 'YOLOv11m Original-150ep',
+            'path': f'runs/medium_models/v11m_original/weights/best.pt'
+        },
+        {
+            'name': 'YOLOv11m Enhanced-150ep', 
+            'path': f'runs/medium_models/v11m_enhanced/weights/best.pt'
         }
     ]
     

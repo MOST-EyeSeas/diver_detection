@@ -5,3 +5,4 @@ temp_*
 runs/
 wandb/
 rilov_data/
+transect_result/
