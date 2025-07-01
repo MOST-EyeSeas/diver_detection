@@ -12,9 +12,15 @@
 
 **COMPLETED PHASES SUMMARY:**
 - **Phase 1 - Diver Detection**: YOLOv11n Original (97.8% mAP50, 72.0% mAP50-95) - DEPLOYED
-- **Phase 2 - Transect Line Detection**: YOLOv11n (94.9% mAP50, 76.8% mAP50-95) - COMPLETED
+- **Phase 2 - Transect Line Detection**: YOLOv11n (94.9% mAP50, 76.8% mAP50-95) - COMPLETED  
+- **Phase 3 - Transect Enhancement Analysis**: CRITICAL FINDINGS - Enhancement hurts geometric patterns - COMPLETED
 
-**NEXT PHASE PLANNED**: Enhancement testing for transect lines using aneris_enhance with same methodological rigor.
+**🚨 CRITICAL DISCOVERY: TASK-SPECIFIC ENHANCEMENT EFFECTS**
+1. ✅ **Enhancement Testing Completed**: Applied aneris_enhance to all 1,743 transect images (100% success)
+2. ❌ **Enhancement Hurts Transect Lines**: -11% performance drop (94.9% → 83.4% mAP50)
+3. 🔍 **Over-Processing Identified**: Oversaturation, artifacts, noise amplification in geometric patterns
+4. ✅ **Cross-Domain Matrix Validated**: Complete 2x2 testing matrix reveals task-specific effects
+5. 📊 **Production Decision**: Use Original models for both tasks (enhancement task-dependent)
 
 ## Recent Changes
 1. Set up the development container with required dependencies
@@ -59,6 +65,11 @@
 40. **🎯 COMPLETED TRANSECT LINE DATASET PREPARATION: 1,743 images with 60-20-20 split**
 41. **✅ COMPLETED TRANSECT LINE TRAINING: Outstanding 94.9% mAP50 performance**
 42. **📊 VALIDATED METHODOLOGY GENERALIZATION: Proven approach works across detection tasks**
+43. **✅ CREATED TRANSECT ENHANCEMENT PIPELINE: `enhance_transect_dataset.py` with 13.5 FPS processing**
+44. **🚨 DISCOVERED ENHANCEMENT OVER-PROCESSING: Oversaturation, artifacts in transect images**
+45. **📊 COMPLETED CROSS-DOMAIN TESTING MATRIX: 2x2 evaluation reveals task-specific effects**
+46. **🔍 IDENTIFIED ENHANCEMENT TASK-DEPENDENCY: Benefits divers (+0.2%), hurts transect lines (-11%)**
+47. **✅ PRODUCTION RECOMMENDATION: Original models for both detection tasks**
 
 ## Current Tasks (Transect Line Detection COMPLETED - Enhancement Testing NEXT)
 - [x] Set up Docker development environment
@@ -94,39 +105,47 @@
 - [x] **Phase 5A: TRANSECT LINE DATASET PREPARATION: Apply proven methodology**
 - [x] **Phase 5B: TRANSECT LINE TRAINING: 50-epoch training with excellent results**
 - [x] **Phase 5C: TRANSECT LINE EVALUATION: Held-out test set validation**
-- [ ] **Phase 6: TRANSECT LINE ENHANCEMENT TESTING: Apply aneris_enhance and compare benefits**
+- [x] **Phase 6A: TRANSECT LINE ENHANCEMENT TESTING: Apply aneris_enhance and compare benefits**
+- [x] **Phase 6B: CROSS-DOMAIN TESTING MATRIX: Complete 2x2 evaluation methodology**
+- [x] **Phase 6C: ENHANCEMENT OVER-PROCESSING ANALYSIS: Identify artifacts and task-dependency**
+- [ ] **Phase 7: CLEAN RE-RUN VALIDATION: Verify findings with fresh transect enhancement experiment**
 
 ## Next Steps
 
-### Immediate Next Steps (Transect Line Enhancement Testing)
-1. **Transect Line Enhancement Dataset Creation**
+### Immediate Next Steps (Clean Re-Run Validation)
+1. **Clean Transect Enhancement Re-Run**
    ```bash
-   # Apply aneris_enhance to transect line dataset
-   python enhance_transect_dataset.py
-   # Create enhanced version following same methodology
+   # Clean start: Remove existing enhanced dataset
+   rm -rf sample_data/transect_line/dataset_proper_enhanced
+   # Re-run enhancement with fresh approach
+   python enhance_transect_dataset.py --force
    ```
-   - Apply aneris_enhance to all 1,743 transect line images
-   - Maintain same 60-20-20 split structure
-   - Compare enhancement benefits vs diver detection findings
+   - Verify enhancement pipeline consistency
+   - Confirm 13.5 FPS processing speed
+   - Validate same over-processing artifacts occur
 
-2. **Enhanced Transect Line Training**
+2. **Clean Training Re-Run**  
    ```bash
-   # Train YOLOv11n on enhanced transect dataset
-   yolo train model=yolo11n.pt data=enhanced_transect_dataset.yaml epochs=50
+   # Fresh enhanced model training
+   yolo train model=yolo11n.pt data=sample_data/transect_line/dataset_proper_enhanced/transect_dataset_enhanced.yaml epochs=50 batch=4 imgsz=320 name=transect_clean_enhanced project=runs/transect_validation
    ```
-   - Use same 50-epoch training configuration
-   - Compare original vs enhanced performance
-   - Test if enhancement benefits vary by detection task
+   - Verify training consistency 
+   - Confirm same performance degradation pattern
+   - Validate findings reproducibility
 
-3. **Cross-Task Enhancement Analysis**
-   - Compare enhancement benefits: divers (+0.2%) vs transect lines (TBD%)
-   - Validate if underwater enhancement is task-specific
-   - Document methodology generalization across detection domains
+3. **Cross-Domain Testing Matrix Validation**
+   ```bash
+   # Test all 4 combinations with fresh models
+   # Original→Original, Original→Enhanced, Enhanced→Original, Enhanced→Enhanced
+   ```
+   - Reproduce complete 2x2 testing matrix
+   - Confirm task-specific enhancement effects
+   - Validate over-processing impact on geometric patterns
 
-4. **Final Deployment Preparation**
-   - Select best transect line model (original vs enhanced)
-   - Prepare multi-model deployment (divers + transect lines)
-   - Optimize for Jetson deployment pipeline
+4. **Final Cross-Task Analysis Documentation**
+   - Confirm enhancement benefits task-dependent (divers +0.2%, transect lines -11%)
+   - Document over-processing artifacts in geometric pattern detection
+   - Finalize production deployment recommendations
 
 ### Future Work (After Enhancement Testing)
 1. **Multi-Model Integration**
@@ -152,10 +171,10 @@
    - ✅ Methodology perfectly generalized from diver detection
    - ✅ Fast training (6.4 minutes) and efficient model (5.4MB)
 
-3. **Enhancement Strategy (TESTING NEXT)**
-   - 🔄 Need to test enhancement benefits for transect line detection
-   - 🔄 Compare enhancement scaling across different detection tasks
-   - 🔄 Determine if underwater enhancement is domain-specific or universal
+3. **Enhancement Strategy (CRITICAL FINDINGS DISCOVERED)**
+   - ✅ **Task-Specific Enhancement Effects Confirmed**: Enhancement helps divers (+0.2%), hurts transect lines (-11%)
+   - ✅ **Over-Processing Identified**: Aggressive parameters cause oversaturation/artifacts in geometric patterns
+   - ✅ **Production Decision**: Use original models for both tasks - enhancement is NOT universal
 
 4. **Training Infrastructure (PROVEN)**
    - ✅ Robust 60-20-20 split methodology prevents data leakage
@@ -178,12 +197,22 @@
    - Inference: ~50-100MB (model + single image forward pass only)
    - 40x memory reduction from training to deployment
 
+4. **Cross-Task Enhancement Analysis (CRITICAL DISCOVERY)**
+   - **Diver Detection**: Enhancement provides minimal benefit (+0.2% mAP50-95)
+   - **Transect Line Detection**: Enhancement significantly hurts performance (-11% mAP50-95)
+   - **Root Cause**: Over-processing (oversaturation, artifacts) disrupts geometric pattern recognition
+   - **Production Impact**: Enhancement is task-dependent, not universally beneficial
+
 ## Future Expansion Plans
-- **🎯 TRANSECT LINE ENHANCEMENT (IMMEDIATE NEXT)**: Test enhancement benefits for different detection task
-  - Apply aneris_enhance to transect line dataset following proven methodology
-  - Compare enhancement benefits across detection domains (divers vs transect lines)
-  - Determine optimal deployment strategy for each detection task
-- **Multi-Model Deployment**: Combined diver + transect line detection system
+- **🔄 CLEAN RE-RUN VALIDATION (IMMEDIATE NEXT)**: Verify transect enhancement findings with fresh experiment
+  - Reproduce enhancement over-processing artifacts
+  - Confirm task-specific performance impacts  
+  - Validate cross-domain testing matrix methodology
+- **🎯 TASK-SPECIFIC ENHANCEMENT RESEARCH**: Develop gentler enhancement parameters for geometric patterns
+  - Test reduced red channel boost (1.1x vs 1.2x)
+  - Milder CLAHE parameters for linear features
+  - Custom enhancement pipelines per detection task type
+- **Multi-Model Deployment**: Combined diver + transect line detection system (both original models)
 - **Real-World Validation**: Test on user's underwater video footage with both detection types
 - **Jetson Optimization**: TensorRT optimization for both models simultaneously
 - **ROV Integration**: Real-time multi-detection pipeline for underwater vehicles 

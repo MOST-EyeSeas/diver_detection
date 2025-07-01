@@ -498,6 +498,43 @@
 - ✅ **Methodologically Sound Results**: Proper train/val/test split with 5,793 held-out images
 - ✅ **Definitive Enhancement Advantages**: Enhanced models outperform original on held-out test set
 - ✅ **Capacity Amplification Confirmed**: YOLOv11s shows 3x enhancement benefit vs nano (+0.59% vs +0.19%)
+- ✅ **Cross-Task Enhancement Analysis Complete**: Task-specific effects discovered and validated
+- ✅ **Over-Processing Issues Identified**: Enhancement can hurt geometric pattern detection
+
+## **CRITICAL DISCOVERY: Task-Specific Enhancement Effects**
+
+### **Cross-Task Enhancement Matrix (FINAL RESULTS)**
+| Detection Task | Enhancement Effect | Performance Impact | Root Cause |
+|----------------|-------------------|-------------------|-------------|
+| **Diver Detection** | ✅ **Minimal Benefit** | **+0.2% mAP50-95** | Human shapes benefit from color/contrast boost |
+| **Transect Line Detection** | ❌ **Significant Harm** | **-11% mAP50-95** | Over-processing disrupts geometric pattern recognition |
+
+### **Over-Processing Diagnostic Patterns**
+- **Oversaturation Detection**: 58x increase in bright pixels (35,189 vs 599 original)
+- **Undersaturation Artifacts**: Pure black pixels created (42,818 vs 0 original)
+- **Noise Amplification**: 2x file size increase, 3x std deviation increase
+- **Brightness Over-Enhancement**: +97.5% brightness increase (should be ~20-30%)
+
+### **Enhancement Parameter Analysis**
+- **Current Parameters**: Red channel boost 1.2x, aggressive CLAHE contrast stretching
+- **Diver Suitability**: Works for complex human shapes with color variations
+- **Geometric Pattern Issues**: Creates artifacts that disrupt line/edge detection
+- **Optimal Strategy**: Task-specific parameter tuning required
+
+### **Cross-Domain Testing Matrix (ESSENTIAL)**
+**ALWAYS test enhancement effects using complete 2x2 matrix:**
+```bash
+# Original Model → Original Images (baseline)
+# Original Model → Enhanced Images (processing artifact impact)  
+# Enhanced Model → Original Images (domain mismatch impact)
+# Enhanced Model → Enhanced Images (combined enhancement effect)
+```
+
+### **Production Deployment Intelligence**
+- **Diver Detection**: Original model (97.8% mAP50) - enhancement overhead not justified
+- **Transect Line Detection**: Original model (94.9% mAP50) - enhancement actively harmful  
+- **Multi-Task Systems**: Use task-specific models without universal enhancement
+- **Enhancement Research**: Focus on task-specific parameter optimization
 - ✅ **Performance Excellence**: YOLOv11s Enhanced achieves 78.15% mAP50-95 (21MB, production-ready)
 - ✅ **Extended Training Benefits**: 150 epochs crucial for revealing enhancement advantages
 - ✅ **Production-Ready Pipeline**: aneris_enhance + YOLOv11s Enhanced model combination optimal
