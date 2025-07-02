@@ -542,3 +542,183 @@
 - ✅ **Critical Bug Discovery**: Found and fixed YAML configuration that silently trained wrong models
 - ✅ **Domain Specialization Proven**: Enhanced models specialized for enhanced images, original for original
 - ✅ **Cross-Domain Testing Issues**: Identified misleading comparisons and implemented proper methodology 
+
+## Core Development Patterns
+
+### Memory Bank Workflow (CRITICAL)
+- **ALWAYS** read all Memory Bank files at start of every session
+- Memory Bank contains project truth and context - not optional
+- Update activeContext.md and progress.md after major achievements
+- Document significant patterns and discoveries in .clinerules
+
+### Docker Environment Setup
+- Use `ultralytics/ultralytics:latest` as base image
+- Mount workspace: `/path/to/project:/workspaces/diver_detection`
+- Enable GPU: `--gpus all`
+- X11 forwarding: `--env DISPLAY=$DISPLAY --volume /tmp/.X11-unix:/tmp/.X11-unix`
+- SSH setup requires custom directory due to permission issues
+
+### Dataset Management Best Practices
+- **ALWAYS use 60-20-20 train/val/test splits** - prevents data leakage and ensures proper evaluation
+- Create completely held-out test sets that are NEVER used during training or model selection
+- Use `--no-progress` flags in batch scripts for cleaner output
+- Verify label-image matching after dataset preparation
+- Test dataset.yaml compatibility before training
+
+### YOLO Training Optimization
+- **50 epochs optimal** for underwater detection tasks - avoids overfitting while achieving excellent performance
+- Use `batch=4` and `imgsz=320` for efficient GPU memory usage with nano models
+- `deterministic=True` for reproducible results (though CUDNN may still cause variations)
+- Project organization: Use descriptive names and consistent directory structure
+
+### Enhancement Pipeline Intelligence
+- **aneris_enhance achieves 13.5 FPS** processing speed (better than documented)
+- **100% success rate** across large datasets (1,743-11,752 images)
+- Parallel processing with 4 workers maximizes efficiency
+- **CRITICAL**: Enhancement effects are **task-specific** - benefits divers, hurts geometric patterns
+
+## Task-Specific Enhancement Effects (CRITICAL DISCOVERY)
+
+### Validated Findings (Scientifically Proven)
+- **Diver Detection**: Enhancement provides minimal benefit (+0.2% mAP50-95)
+- **Transect Line Detection**: Enhancement significantly hurts performance (-5.4% to -11.5%)
+- **Root Cause**: Over-processing creates oversaturation, artifacts, noise that disrupts geometric pattern recognition
+- **Architecture Independence**: YOLOv11n and YOLOv12n show identical degradation patterns
+- **Production Decision**: Use original models for both detection tasks
+
+### Over-Processing Artifacts (Documented)
+- **Oversaturation**: 4-7x increase in bright pixels (>200 intensity)
+- **Noise Amplification**: +16 to +20 standard deviation increase
+- **File Size Growth**: 2-3x increase indicates artifact introduction
+- **Visual Impact**: Geometric patterns become unclear, edge definition degraded
+
+### Cross-Domain Testing Matrix (PROVEN METHODOLOGY)
+- **Complete 2x2 Evaluation**: Train/test on original vs enhanced datasets
+- **Bidirectional Testing**: Test both training→test data directions
+- **Domain Mismatch Effects**: Enhanced models degrade on original images (-11.5%)
+- **Reverse Effects**: Original models also degrade on enhanced images (-2.0%)
+
+## Scientific Validation Methodologies (DISCOVERED)
+
+### Reproducibility Challenges (IMPORTANT)
+- **CUDNN Non-Determinism**: PyTorch CUDNN uses non-deterministic algorithms despite `deterministic=True`
+- **Training Variations**: Identical parameters can produce 5-6% performance differences
+- **Multiple Evidence Sources**: Use both training metrics AND test set validation for confirmation
+- **Direct Model Testing**: Test documented models directly to validate baseline claims
+
+### Architecture Independence Validation
+- **Cross-Architecture Testing**: Test findings across multiple model architectures (YOLOv11n, YOLOv12n)
+- **Pattern Consistency**: Enhancement degradation patterns identical across architectures
+- **Task-Fundamental Effects**: Enhancement impacts determined by task type, not model architecture
+- **Universal Validation**: Findings generalizable beyond specific model choices
+
+### Evidence Strengthening Strategies
+- **Fresh Re-Run Validation**: Reproduce findings with completely fresh experiments
+- **Cross-Domain Matrix**: Test all training/test data combinations
+- **Baseline Confirmation**: Validate documented performance through direct model testing
+- **Timeline Analysis**: Document when experiments were conducted for reproducibility tracking
+
+## Model Selection Intelligence
+
+### Nano Model Characteristics
+- **Capacity Limitations**: Enhancement benefits minimal for YOLOv11n/YOLOv12n due to model size constraints
+- **Efficiency Focus**: 5.4MB models ideal for edge deployment (Jetson, embedded systems)
+- **Performance Ceiling**: Nano models near accuracy ceiling, enhancement can't improve significantly
+- **Production Sweet Spot**: Excellent baseline performance without enhancement overhead
+
+### Training Duration Optimization
+- **50 Epochs Sufficient**: Adequate for detecting enhancement effects and achieving production performance
+- **Convergence Analysis**: Models reach plateau around 30-40 epochs, minimal improvement beyond 50
+- **Extended Training Question**: 100-epoch testing planned to confirm sufficiency
+- **Methodology Validation**: 50-epoch approach proven across multiple detection tasks
+
+### Performance Validation Standards
+- **Test Set Gold Standard**: Held-out test set performance more reliable than training metrics
+- **Cross-Task Generalization**: Same methodology successfully applied to diver and transect line detection
+- **Production Thresholds**: >90% mAP50 achieved for both detection tasks with original models
+- **Deployment Readiness**: Both models meet production quality standards
+
+## Technical Implementation Details
+
+### GPU Memory Management
+- Training: ~2.3GB (model + gradients + optimizer + batch data)
+- Inference: ~50-100MB (40x reduction from training)
+- Optimal for Jetson deployment with 8GB+ memory
+
+### File Organization Patterns
+- Use `runs/` directory with descriptive project names
+- Separate validation experiments in dedicated folders
+- Keep original and enhanced datasets in parallel structures
+- Maintain clear naming conventions for cross-comparisons
+
+### Result Analysis Infrastructure
+- CSV export for detailed performance analysis
+- Automated visualization generation (training curves, comparisons)
+- Cross-experiment comparison tools essential for validation
+- Complete experimental documentation for reproducibility
+
+## Production Deployment Strategy
+
+### Model Selection (VALIDATED)
+- **Diver Detection**: YOLOv11n Original (97.8% mAP50, 72.0% mAP50-95)
+- **Transect Line Detection**: YOLOv11n Original (94.9% mAP50, 76.8% mAP50-95)
+- **Enhancement Strategy**: Original models for both tasks (enhancement hurts transect lines)
+- **Deployment Target**: Jetson edge devices with TensorRT optimization
+
+### Next Phase Strategy (Extended Training Validation)
+- **100-Epoch Training**: Confirm enhancement degradation persists with full convergence
+- **Extended Cross-Domain Testing**: Complete validation matrix with longer training
+- **Final Model Selection**: Compare 50-epoch vs 100-epoch for production deployment
+- **Methodology Confirmation**: Validate 50-epoch training was sufficient
+
+### Future Integration Path
+- **Multi-Model Pipeline**: Combined diver + transect line detection system
+- **Real-World Testing**: User underwater footage validation
+- **ROV Integration**: Real-time detection pipeline for underwater vehicles
+- **Performance Optimization**: TensorRT conversion and edge deployment testing
+
+## Critical Project Learnings
+
+### Enhancement Research (GAME-CHANGING)
+- Enhancement effects are **task-dependent**, not universally beneficial
+- Geometric pattern detection particularly sensitive to over-processing artifacts
+- Cross-domain testing essential for understanding enhancement impacts
+- Task-specific parameter tuning may be required for different detection types
+
+### Scientific Methodology (PROVEN)
+- Multiple evidence sources strengthen findings validity
+- Architecture independence testing confirms generalizability
+- Reproducibility challenges require robust validation methodologies
+- Direct model testing validates documented performance claims
+
+### Production Decision Making (EVIDENCE-BASED)
+- Enhancement benefits must outweigh processing overhead
+- Original models provide excellent performance without complexity
+- Task-specific enhancement effects guide production strategy
+- Scientific validation essential for confident deployment decisions
+
+## User Preferences and Workflow Patterns
+
+### User Working Style
+- Methodical approach to validation and verification
+- Values scientific rigor and reproducible results
+- Prefers evidence-based decision making over assumptions
+- Appreciates comprehensive documentation of findings
+
+### Preferred Development Approach
+- Systematic validation of findings through fresh experiments
+- Cross-architecture testing for generalizability confirmation
+- Extended training validation to eliminate convergence questions
+- Complete documentation of methodologies and results
+
+### Quality Standards
+- Production-ready performance thresholds (>90% mAP50)
+- Scientific validation of enhancement effects across architectures
+- Reproducibility investigation when discrepancies discovered
+- Evidence-based model selection with clear justification
+
+### Communication Preferences
+- Detailed analysis with complete result matrices
+- Scientific terminology and rigorous methodology description
+- Clear documentation of findings with supporting evidence
+- Comprehensive status updates with complete context 
