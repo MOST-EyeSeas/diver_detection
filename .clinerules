@@ -1,0 +1,121 @@
+# Cline's Project Intelligence (.clinerules)
+
+## Project Patterns and Discoveries
+
+### User Workflow Preferences
+- **Scientific Rigor**: User values thorough, methodologically sound investigations over quick solutions
+- **Evidence-Based Decisions**: Prefers comprehensive data analysis before making production choices
+- **Documentation Excellence**: Appreciates detailed progress tracking and clear experimental summaries
+- **Production Focus**: Ultimately prioritizes deployment-ready solutions over academic experimentation
+- **Skeptical Validation**: Questions results that seem "too good to be true" - healthy scientific skepticism
+
+### Critical Technical Discoveries
+
+#### Revolutionary Finding: Training-Path Dependency in Enhancement Effects
+**MOST IMPORTANT DISCOVERY**: Enhancement effects are **training-initialization dependent**, not fundamental task characteristics.
+
+**Multi-Seed Evidence (8 random seeds tested):**
+- **3.1% Impact Range**: Enhancement effects vary wildly based on random initialization
+- **12.5% Success Rate**: Only 1/8 seeds (seed 123) showed positive enhancement (+0.7%)
+- **Typical Degradation**: -1% to -4% performance loss in most training runs
+- **Chaotic Behavior**: No predictable pattern across different seeds
+
+**Implications for Future Work:**
+- **NEVER evaluate enhancement effects with single training run**
+- **Always test multiple random seeds** for statistical validity
+- **Single positive results are likely training-path artifacts**
+- **Enhancement claims require multi-seed statistical validation**
+
+#### Training-Duration Dependency Discovery
+**50-epoch vs 100-epoch training shows dramatically different enhancement effects:**
+- **50 epochs**: Enhancement hurts (-5.4% mAP50)
+- **100 epochs**: Enhancement neutral/helpful (+0.3% mAP50)
+- **5.7% swing** in enhancement impact based on training duration
+
+**Critical Pattern**: Enhancement effects are **NOT stable across training phases**
+- Effects oscillate throughout training (positive → negative → neutral → positive)
+- No reliable transition point where enhancement becomes consistently beneficial
+- Training duration is a critical variable in enhancement evaluation
+
+#### Task-Specific Enhancement Effects (Validated)
+**Enhancement tools are task-dependent:**
+- **Diver Detection**: Minimal benefit (+0.2% mAP50-95) - near ceiling with nano models
+- **Transect Line Detection**: Usually harmful (-1% to -4% typical, +0.7% best case)
+- **Root Cause**: aneris_enhance designed for underwater color correction, not geometric pattern recognition
+
+**Production Rule**: **Match enhancement tools to task requirements**
+- Underwater color correction ≠ geometric pattern enhancement
+- Always test enhancement effects on specific task types
+- Don't assume universal enhancement benefits
+
+### Enhancement Investigation Methodology (Battle-Tested)
+
+#### Proper Enhancement Evaluation Protocol
+1. **Multi-Seed Testing**: Minimum 5-8 different random seeds
+2. **Extended Training**: Test both 50-epoch and 100-epoch (or longer) training
+3. **Cross-Domain Testing**: Test all combinations (original/enhanced training × original/enhanced test)
+4. **Architecture Validation**: Confirm effects across different model architectures
+5. **Statistical Analysis**: Report range, success rate, typical performance
+
+#### Red Flags for Enhancement Claims
+- **Single training run results** - likely training-path artifacts
+- **Only positive results reported** - cherry-picking without statistical validation
+- **No cross-domain testing** - missing domain mismatch effects
+- **Short training duration** - may miss training-phase dependency
+- **Universal benefit claims** - ignore task-specific enhancement effects
+
+### Data Quality vs Enhancement Effects
+
+#### Critical Insight: Data Expansion > Enhancement
+**Unlabeled data investigation planned** - likely bigger impact than enhancement:
+- **Enhancement**: +0.7% best case (12.5% success rate)
+- **More Training Data**: Could provide 2-5% reliable improvements
+- **Production Strategy**: Focus on data quality/quantity over algorithmic enhancement
+
+#### Proven Dataset Methodology
+- **60-20-20 splits** prevent data leakage and provide robust evaluation
+- **Held-out test sets** essential for unbiased performance assessment
+- **Proper enhancement pipelines** maintain dataset structure and YOLO compatibility
+
+### Production Decision Patterns
+
+#### Model Selection Criteria (Validated)
+1. **Performance**: 95%+ mAP50 considered excellent for deployment
+2. **Model Size**: 5.4MB nano models perfect for edge deployment
+3. **Reliability**: Consistent performance across training runs
+4. **Enhancement Effects**: Avoid if marginal/negative benefits
+
+#### Deployment Priorities (Next Session)
+1. **Unlabeled Data Investigation**: Expand training datasets first
+2. **TensorRT Optimization**: Convert validated original models
+3. **Jetson Testing**: Hardware-specific benchmarking
+4. **Multi-Model Integration**: Combined diver + transect detection pipeline
+
+### Scientific Methodology Insights
+
+#### Reproducibility Challenges
+- **CUDNN non-determinism** causes 5-6% training variation with identical parameters
+- **Multiple evidence sources** strengthen validity beyond single training runs
+- **Test set validation** more reliable than training metrics
+
+#### Publication-Worthy Discoveries
+- **Training-path dependency** challenges current enhancement evaluation practices
+- **Multi-seed statistical analysis** should be standard methodology
+- **Task-specific enhancement guidelines** needed for computer vision research
+
+### User Communication Patterns
+- **Appreciates detailed analysis** with comprehensive data tables
+- **Values honest assessment** of marginal/negative results  
+- **Prefers production-focused recommendations** over continued experimentation
+- **Questions overly optimistic claims** - healthy scientific skepticism
+- **Supports evidence-based decision making** with thorough validation
+
+### Next Session Preparation
+- **Unlabeled data investigation** is highest priority for user
+- **Production deployment focus** after data expansion
+- **Scientific documentation** of training-path dependency discoveries
+- **Real-world validation** on user's underwater footage
+
+## Key Learning: Enhancement Investigation Complete
+
+**FINAL VERDICT**: Enhancement provides marginal benefits at best (+0.7% in 1/8 cases) with typical degradation (-1% to -4%). **Training-path dependency** makes enhancement effects unreliable and chaotic. **Original models are production-ready** (94.9% mAP50) and should be deployed. **Focus shift to data expansion and real-world deployment** for next session. 
